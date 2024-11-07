@@ -16,11 +16,16 @@
     <description>demo</description>
 
     <modules>
+        <module>multiDsJpaDemo</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
         <revision>1.0</revision>
+        <openapi.version>2.6.0</openapi.version>
+        <fastjson.version>2.0.53</fastjson.version>
+        <jasypt.version>3.0.5</jasypt.version>
+        <dameng.version>8.1.1.193</dameng.version>
     </properties>
 
 </project>
