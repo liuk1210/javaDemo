@@ -17,6 +17,7 @@
 
     <modules>
         <module>multiDsJpaDemo</module>
+        <module>mybatisDemo</module>
     </modules>
 
     <properties>
@@ -26,6 +27,9 @@
         <fastjson.version>2.0.53</fastjson.version>
         <jasypt.version>3.0.5</jasypt.version>
         <dameng.version>8.1.1.193</dameng.version>
+        <poi.version>5.2.5</poi.version>
+        <mybatis.version>3.0.3</mybatis.version>
+        <guava.version>33.3.1-jre</guava.version>
     </properties>
 
 </project>

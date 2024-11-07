@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mybatis.dao.TableDao">
+    <resultMap id="resultMap" type="com.demo.mybatis.entity.Table">
+        <result column="COLUMN_NAME" jdbcType="VARCHAR" property="columnName"/>
+        <result column="DATA_TYPE" jdbcType="VARCHAR" property="type"/>
+        <result column="COMMENTS" jdbcType="VARCHAR" property="comments"/>
+        <result column="DATA_LENGTH" jdbcType="VARCHAR" property="dataLength"/>
+        <result column="NULLABLE" jdbcType="VARCHAR" property="nullable"/>
+    </resultMap>
+    <select id="litTableColumn" resultMap="resultMap">
+        SELECT B.COLUMN_NAME,
+               B.DATA_TYPE,
+               A.COMMENTS,
+               B.DATA_LENGTH,
+               B.NULLABLE
+        FROM ALL_COL_COMMENTS A,
+             ALL_TAB_COLUMNS B
+        WHERE A.OWNER = B.OWNER
+          AND A.TABLE_NAME = B.TABLE_NAME
+          AND A.COLUMN_NAME = B.COLUMN_NAME
+          AND A.OWNER = #{username}
+          AND A.TABLE_NAME = #{tableName}
+        ORDER BY B.COLUMN_ID
+    </select>
+    <select id="listAllTableName" resultType="String">
+        SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME
+    </select>
+</mapper>
