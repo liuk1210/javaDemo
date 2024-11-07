@@ -19,6 +19,7 @@
         <module>multiDsJpaDemo</module>
         <module>mybatisDemo</module>
         <module>poiDemo</module>
+        <module>common-util</module>
     </modules>
 
     <properties>
