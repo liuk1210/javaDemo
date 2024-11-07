@@ -8,10 +8,10 @@
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>multiDsJpaDemo</artifactId>
+    <artifactId>multi-ds-jpa-demo</artifactId>
     <version>${revision}</version>
-    <name>multiDsJpaDemo</name>
-    <description>multiDsJpaDemo</description>
+    <name>multi-ds-jpa-demo</name>
+    <description>multi-ds-jpa-demo</description>
 
     <dependencies>
         <dependency>

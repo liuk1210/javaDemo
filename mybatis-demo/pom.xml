@@ -8,10 +8,10 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>mybatisDemo</artifactId>
+	<artifactId>mybatis-demo</artifactId>
 	<version>${revision}</version>
-	<name>mybatisDemo</name>
-	<description>mybatisDemo</description>
+	<name>mybatis-demo</name>
+	<description>mybatis-demo</description>
 
 	<dependencies>
 		<dependency>
