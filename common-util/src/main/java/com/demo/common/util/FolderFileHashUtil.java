@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 
 @Slf4j
 public class FolderFileHashUtil {
+
     public static void main(String[] args) {
         String folderPath = "C:\\Workspaces\\Software";
 
@@ -21,22 +22,13 @@ public class FolderFileHashUtil {
             return;
         }
 
-        // 计算最长的文件名长度
-        int maxFileNameLength = 0;
-        for (File file : listOfFiles) {
-            if (file.isFile() && file.getName().length() > maxFileNameLength) {
-                maxFileNameLength = file.getName().length();
-            }
-        }
-
-        // 打印表头
-        System.out.printf("%-" + maxFileNameLength + "s\tSHA-256 Hash%n", "File Name");
         // 打印每个文件的哈希值
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 try {
                     String sha256 = getFileChecksum(file);
-                    System.out.printf("%-" + maxFileNameLength + "s\t%s%n", file.getName(), sha256);
+                    System.out.println("文件："+file.getName());
+                    System.out.println("SHA256："+sha256+"\n");
                 } catch (Exception e) {
                     log.error("Error computing hash for file: {}", file.getName());
                 }
