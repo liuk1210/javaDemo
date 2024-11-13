@@ -39,7 +39,7 @@ public class FolderFileHashUtil {
     private static String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] byteArray = new byte[1024];
+            byte[] byteArray = new byte[8192];
             int bytesRead;
             while ((bytesRead = fis.read(byteArray)) != -1) {
                 digest.update(byteArray, 0, bytesRead);
