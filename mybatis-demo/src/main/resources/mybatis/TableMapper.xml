@@ -26,4 +26,17 @@
     <select id="listAllTableName" resultType="String">
         SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME
     </select>
+
+    <select id="listMySQLTableColumn" resultMap="resultMap">
+        SELECT COLUMN_NAME,
+               COLUMN_TYPE as DATA_TYPE,
+               COLUMN_COMMENT as COMMENTS,
+               CHARACTER_MAXIMUM_LENGTH AS DATA_LENGTH,
+               case when IS_NULLABLE='YES' then 'Y' else 'N' end as NULLABLE
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = #{dbName}
+          AND TABLE_NAME = #{tableName}
+        ORDER BY ORDINAL_POSITION;
+    </select>
+
 </mapper>

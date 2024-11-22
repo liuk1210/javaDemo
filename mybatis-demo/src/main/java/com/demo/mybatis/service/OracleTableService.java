@@ -17,7 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Service
-public class TableService {
+public class OracleTableService {
     @Resource
     private TableDao tableDao;
     @Resource

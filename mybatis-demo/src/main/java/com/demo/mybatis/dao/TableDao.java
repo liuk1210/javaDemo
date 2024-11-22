@@ -11,4 +11,5 @@ import java.util.List;
 public interface TableDao {
     List<Table> litTableColumn(String username, String tableName);
     List<String> listAllTableName();
+    List<Table> listMySQLTableColumn(String dbName, String tableName);
 }

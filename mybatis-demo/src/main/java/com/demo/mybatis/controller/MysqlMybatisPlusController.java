@@ -1,7 +1,6 @@
 package com.demo.mybatis.controller;
 
-import com.demo.mybatis.entity.HttpResult;
-import com.demo.mybatis.service.OracleTableService;
+import com.demo.mybatis.service.MysqlTableService;
 import com.demo.mybatis.util.DownloadUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,37 +15,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
-@Tag(name = "代码生成工具-Mybatis")
+@Tag(name = "代码生成工具-MybatisPlus")
 @RestController
-@RequestMapping("mybatis")
-public class MybatisController {
+@RequestMapping("mybatisPlus")
+public class MysqlMybatisPlusController {
     @Resource
-    private OracleTableService oracleTableService;
+    private MysqlTableService mysqlTableService;
 
     @GetMapping("table/generateCode")
-    @Operation(summary = "根据表名生成代码", description = "生成mybatis相关代码（v2注解）")
+    @Operation(summary = "根据表名生成代码", description = "生成mybatis相关代码（Swagger-v3注解）")
     @Parameters({
             @Parameter(name = "tableName", description = "表名", example = "w_table_name"),
             @Parameter(name = "packageName", description = "包名，生成的代码文件包名",example = "com.a.table"),
-            @Parameter(name = "ignorePrefix", description = "忽略表名前缀，为空则默认按照表名驼峰命名", example = "w_")
+            @Parameter(name = "moduleName", description = "模块名称")
     })
     public ResponseEntity<byte[]> tableInfo(HttpServletRequest request,
                                             HttpServletResponse response,
                                             @RequestParam String tableName,
                                             @RequestParam String packageName,
-                                            @RequestParam(value = "ignorePrefix" ,required = false) String ignorePrefix
+                                            @RequestParam(value = "moduleName" ,required = false) String moduleName
     ) throws Exception {
-        byte[] b = oracleTableService.getTableInfo(tableName,packageName,ignorePrefix);
+        byte[] b = mysqlTableService.getTableInfo(tableName,packageName,moduleName);
         return DownloadUtil.download(request, response, b, packageName + ".zip");
-    }
-
-    @GetMapping("all/table")
-    @Operation(summary = "获取所有表")
-    public HttpResult<List<String>> listAllTableName() {
-        List<String> list = oracleTableService.listAllTableName();
-        return new HttpResult<>(list);
     }
 
 }
