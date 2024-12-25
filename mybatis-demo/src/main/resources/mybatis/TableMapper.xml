@@ -11,29 +11,24 @@
         <result column="TABLE_COMMENTS" jdbcType="VARCHAR" property="tableComments"/>
     </resultMap>
     <select id="listTableColumn" resultMap="resultMap">
-        SELECT case
-                   when B.COLUMN_NAME in (SELECT cols.column_name
-                                          FROM all_constraints cons
-                                                   JOIN all_cons_columns cols
-                                                        ON cons.constraint_name = cols.constraint_name
-                                          WHERE cons.owner = #{username}
-                                            AND cons.table_name = #{tableName}
-                                            AND cons.constraint_type = 'P') then 'Y'
-                   else 'N' end       as IS_PRIMARY_KEY,
+        SELECT CASE WHEN D.COLUMN_NAME IS NULL THEN 'N' ELSE 'Y' END
+                          AS IS_PRIMARY_KEY,
                B.COLUMN_NAME,
                A.COMMENTS,
                B.DATA_TYPE,
                B.DATA_LENGTH,
                B.NULLABLE,
-               (SELECT comments
-                FROM DBA_TAB_COMMENTS
-                WHERE table_name = #{tableName}) as TABLE_COMMENTS
-        FROM ALL_COL_COMMENTS A,
-             ALL_TAB_COLUMNS B
-        WHERE A.OWNER = B.OWNER
-          AND A.TABLE_NAME = B.TABLE_NAME
-          AND A.COLUMN_NAME = B.COLUMN_NAME
-          AND A.OWNER = #{username}
+               C.COMMENTS AS TABLE_COMMENTS
+        FROM ALL_COL_COMMENTS A
+                 JOIN ALL_TAB_COLUMNS B ON A.OWNER = B.OWNER AND A.TABLE_NAME = B.TABLE_NAME AND A.COLUMN_NAME = B.COLUMN_NAME
+                 JOIN DBA_TAB_COMMENTS C ON A.OWNER = C.OWNER AND A.TABLE_NAME = C.TABLE_NAME
+                 LEFT JOIN (SELECT COLS.COLUMN_NAME, CONS.OWNER, CONS.TABLE_NAME
+                            FROM ALL_CONSTRAINTS CONS
+                                     JOIN ALL_CONS_COLUMNS COLS
+                                          ON CONS.CONSTRAINT_NAME = COLS.CONSTRAINT_NAME
+                            WHERE CONS.CONSTRAINT_TYPE = 'P') D
+                           ON A.OWNER = D.OWNER AND A.TABLE_NAME = D.TABLE_NAME AND D.COLUMN_NAME = A.COLUMN_NAME
+        WHERE A.OWNER = #{username}
           AND A.TABLE_NAME = #{tableName}
         ORDER BY B.COLUMN_ID
     </select>

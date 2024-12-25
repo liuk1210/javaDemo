@@ -19,35 +19,29 @@ public class OracleJdbcTableDocsMdUtil {
     }
 
     public static String buildMdStr(String tableName){
-        String sql = "SELECT case\n" +
-                "           when B.COLUMN_NAME in (SELECT cols.column_name\n" +
-                "                                  FROM all_constraints cons\n" +
-                "                                           JOIN all_cons_columns cols\n" +
-                "                                                ON cons.constraint_name = cols.constraint_name\n" +
-                "                                  WHERE cons.owner = ?\n" +
-                "                                    AND cons.table_name = ?\n" +
-                "                                    AND cons.constraint_type = 'P') then 'Y'\n" +
-                "           else 'N' end              as IS_PRIMARY_KEY,\n" +
-                "       B.COLUMN_NAME,\n" +
-                "       A.COMMENTS,\n" +
-                "       B.DATA_TYPE,\n" +
-                "       B.DATA_LENGTH,\n" +
-                "       B.NULLABLE,\n" +
-                "       (SELECT comments\n" +
-                "        FROM DBA_TAB_COMMENTS\n" +
-                "        WHERE table_name = ?) as table_comments\n" +
-                "FROM ALL_COL_COMMENTS A,\n" +
-                "     ALL_TAB_COLUMNS B\n" +
-                "WHERE A.OWNER = B.OWNER\n" +
-                "  AND A.TABLE_NAME = B.TABLE_NAME\n" +
-                "  AND A.COLUMN_NAME = B.COLUMN_NAME\n" +
-                "  AND A.OWNER = ?\n" +
-                "  AND A.TABLE_NAME = ?\n" +
-                "ORDER BY B.COLUMN_ID";
+        String sql = """
+                SELECT CASE WHEN D.COLUMN_NAME IS NULL THEN 'N' ELSE 'Y' END
+                                  AS IS_PRIMARY_KEY,
+                       B.COLUMN_NAME,
+                       A.COMMENTS,
+                       B.DATA_TYPE,
+                       B.DATA_LENGTH,
+                       B.NULLABLE,
+                       C.COMMENTS AS TABLE_COMMENTS
+                FROM ALL_COL_COMMENTS A
+                         JOIN ALL_TAB_COLUMNS B ON A.OWNER = B.OWNER AND A.TABLE_NAME = B.TABLE_NAME AND A.COLUMN_NAME = B.COLUMN_NAME
+                         JOIN DBA_TAB_COMMENTS C ON A.OWNER = C.OWNER AND A.TABLE_NAME = C.TABLE_NAME
+                         LEFT JOIN (SELECT COLS.COLUMN_NAME, CONS.OWNER, CONS.TABLE_NAME
+                                    FROM ALL_CONSTRAINTS CONS
+                                             JOIN ALL_CONS_COLUMNS COLS
+                                                  ON CONS.CONSTRAINT_NAME = COLS.CONSTRAINT_NAME
+                                    WHERE CONS.CONSTRAINT_TYPE = 'P') D
+                                   ON A.OWNER = D.OWNER AND A.TABLE_NAME = D.TABLE_NAME AND D.COLUMN_NAME = A.COLUMN_NAME
+                WHERE A.OWNER = ?
+                  AND A.TABLE_NAME = ?
+                ORDER BY B.COLUMN_ID
+                """;
         List<Object> params = new ArrayList<>();
-        params.add(DB_USER.toUpperCase());
-        params.add(tableName.toUpperCase());
-        params.add(tableName.toUpperCase());
         params.add(DB_USER.toUpperCase());
         params.add(tableName.toUpperCase());
         List<JSONObject> list = queryOracleDatabaseWithParamsAndConvertToJson(sql, params);
