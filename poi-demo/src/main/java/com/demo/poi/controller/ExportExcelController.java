@@ -35,4 +35,10 @@ public class ExportExcelController {
         return XlsxUtil.read(file);
     }
 
+    @PostMapping(value = "/demo")
+    @Operation(summary = "导出模板demo")
+    public void demo(HttpServletResponse response) {
+        exportExcelService.exportDemo(response);
+    }
+
 }
