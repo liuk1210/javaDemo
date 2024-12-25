@@ -31,7 +31,7 @@ public class OracleTableService {
         String classBaseName = getJavaClassBaseName(tableName, ignorePrefix);
 
         String username = Objects.requireNonNull(env.getProperty("spring.datasource.username")).toUpperCase();
-        List<Table> list = tableDao.litTableColumn(username, tableName.toUpperCase());
+        List<Table> list = tableDao.listTableColumn(username, tableName.toUpperCase());
         list.forEach(this::setTableData);
 
         ByteArrayOutputStream bo = new ByteArrayOutputStream();

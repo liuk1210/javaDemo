@@ -7,13 +7,27 @@
         <result column="COMMENTS" jdbcType="VARCHAR" property="comments"/>
         <result column="DATA_LENGTH" jdbcType="VARCHAR" property="dataLength"/>
         <result column="NULLABLE" jdbcType="VARCHAR" property="nullable"/>
+        <result column="IS_PRIMARY_KEY" jdbcType="VARCHAR" property="isPrimaryKey"/>
+        <result column="TABLE_COMMENTS" jdbcType="VARCHAR" property="tableComments"/>
     </resultMap>
-    <select id="litTableColumn" resultMap="resultMap">
-        SELECT B.COLUMN_NAME,
-               B.DATA_TYPE,
+    <select id="listTableColumn" resultMap="resultMap">
+        SELECT case
+                   when B.COLUMN_NAME in (SELECT cols.column_name
+                                          FROM all_constraints cons
+                                                   JOIN all_cons_columns cols
+                                                        ON cons.constraint_name = cols.constraint_name
+                                          WHERE cons.owner = #{username}
+                                            AND cons.table_name = #{tableName}
+                                            AND cons.constraint_type = 'P') then 'Y'
+                   else 'N' end       as IS_PRIMARY_KEY,
+               B.COLUMN_NAME,
                A.COMMENTS,
+               B.DATA_TYPE,
                B.DATA_LENGTH,
-               B.NULLABLE
+               B.NULLABLE,
+               (SELECT comments
+                FROM DBA_TAB_COMMENTS
+                WHERE table_name = #{tableName}) as TABLE_COMMENTS
         FROM ALL_COL_COMMENTS A,
              ALL_TAB_COLUMNS B
         WHERE A.OWNER = B.OWNER

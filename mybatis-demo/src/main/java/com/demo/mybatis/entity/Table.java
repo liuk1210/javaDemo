@@ -12,4 +12,6 @@ public class Table {
     private String property;    //驼峰命名
     private String jdbcType;    //jdbc类型
     private String javaType;    //java类型
+    private String isPrimaryKey;    //字段是否主键
+    private String tableComments; //表名备注
 }

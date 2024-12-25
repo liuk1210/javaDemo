@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 @Repository
 public interface TableDao {
-    List<Table> litTableColumn(String username, String tableName);
+    List<Table> listTableColumn(String username, String tableName);
     List<String> listAllTableName();
     List<Table> listMySQLTableColumn(String dbName, String tableName);
 }
