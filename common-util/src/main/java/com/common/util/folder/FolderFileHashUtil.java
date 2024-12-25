@@ -1,4 +1,4 @@
-package com.demo.common.util;
+package com.common.util.folder;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
 public class FolderFileHashUtil {
 
     public static void main(String[] args) {
-        String folderPath = "D:\\software";
+        String folderPath = "C:\\Users\\Liuk\\Downloads\\soft";
         String sha256FolderPath = folderPath + "\\" + "sha256";
         File folder = new File(folderPath);
         File[] listOfFiles = folder.listFiles();

@@ -1,4 +1,4 @@
-package com.demo.common.util;
+package com.common.util.folder;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public class FolderCompareUtil {
 
     public static void main(String[] args) {
-        compareSourcesAndBackupFolder("C:\\Workspaces", "U:\\Workspaces");
+        compareSourcesAndBackupFolder("C:\\Workspaces\\Projects", "V:\\Projects");
     }
 
     public static void compareSourcesAndBackupFolder(String sourcesFolder, String backupFolder) {

@@ -38,6 +38,12 @@
             <version>${guava.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>5.0.0-alpha-11</version>
+        </dependency>
+
     </dependencies>
 
     <build>
