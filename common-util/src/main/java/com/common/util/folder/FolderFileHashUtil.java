@@ -3,13 +3,12 @@ package com.common.util.folder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
+import static com.common.util.sha256.Sha256Util.calculateSHA256;
 
 @Slf4j
 public class FolderFileHashUtil {
@@ -34,7 +33,7 @@ public class FolderFileHashUtil {
             if (file.isFile()) {
                 try {
                     System.out.println("正在读取" + file.getName() + "中...");
-                    String sha256 = getFileChecksum(file);
+                    String sha256 = calculateSHA256(file.toPath());
                     System.out.println("文件：" + file.getName());
                     System.out.println("SHA256：" + sha256);
                     String sha256FileName = file.getName() + "." + sha256 + "." + file.length() + ".sha256";
@@ -53,24 +52,6 @@ public class FolderFileHashUtil {
         }
 
         System.out.println("总文件数：" + sum + "，已创建" + createFileCount + "个sha256文件，已存在" + existFileCount + "个sha256文件");
-    }
-
-    private static String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] byteArray = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = fis.read(byteArray)) != -1) {
-                digest.update(byteArray, 0, bytesRead);
-            }
-        }
-
-        byte[] hashBytes = digest.digest();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 
     /**

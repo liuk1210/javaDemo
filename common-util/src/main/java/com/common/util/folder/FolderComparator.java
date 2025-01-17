@@ -6,10 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static com.common.util.sha256.Sha256Util.calculateSHA256;
 
 @Slf4j
 public class FolderComparator {
@@ -144,33 +145,6 @@ public class FolderComparator {
                 System.out.println(relativePath);
             }
         });
-    }
-
-    private static String calculateSHA256(Path file){
-        try{
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] buffer = new byte[8192];
-            int count;
-
-            try (var is = Files.newInputStream(file)) {
-                while ((count = is.read(buffer)) > 0) {
-                    digest.update(buffer, 0, count);
-                }
-            }
-
-            byte[] hash = digest.digest();
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        }catch (Exception e){
-            log.error(e.getMessage(),e);
-        }
-        return "";
     }
 
 }
