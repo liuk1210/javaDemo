@@ -114,12 +114,14 @@ public class FolderComparator {
     private static void printDiffInfo(Path basePath1, Path basePath2, List<String> inPath1NotInPath2Folder, List<String> inPath1NotInPath2File) {
         System.out.printf("%s目录结构读取完毕.%n", basePath1);
         if (!inPath1NotInPath2Folder.isEmpty() && PRINT_FOLDER_MISS) {
-            System.out.printf("%s中不存在以下%d个文件夹：%n", basePath2, inPath1NotInPath2Folder.size());
-            inPath1NotInPath2Folder.forEach(System.out::println);
+            System.out.printf("%s中缺失以下%d个文件夹：%n", basePath2, inPath1NotInPath2Folder.size());
+            FileTreePrinter.print(inPath1NotInPath2Folder);
+            System.out.printf("%s中缺失以上%d个文件夹：%n%n", basePath2, inPath1NotInPath2Folder.size());
         }
         if (!inPath1NotInPath2File.isEmpty() & PRINT_FILE_MISS) {
-            System.out.printf("%s中不存在以下%d个文件：%n", basePath2, inPath1NotInPath2File.size());
-            inPath1NotInPath2File.forEach(System.out::println);
+            System.out.printf("%s中缺失以下%d个文件：%n", basePath2, inPath1NotInPath2File.size());
+            FileTreePrinter.print(inPath1NotInPath2File);
+            System.out.printf("%s中缺失以上%d个文件：%n%n", basePath2, inPath1NotInPath2File.size());
         }
         System.out.println();
     }
@@ -128,6 +130,7 @@ public class FolderComparator {
         if (!PRINT_FILE_DIFF) {
             return;
         }
+        System.out.println("正在计算并比对文件sha256值中...");
         final int threadCount = Runtime.getRuntime().availableProcessors();
         final int batchSize = Math.max(1, commonFiles.size() / (threadCount * 4)); // 每批次处理的文件数
         AtomicInteger processedFiles = new AtomicInteger(0); // 进度计数器
@@ -156,8 +159,9 @@ public class FolderComparator {
             }
             return rs;
         }).join();
-        results.forEach(System.out::println);
-        System.out.printf("%n-----------------比对文件sha256结束，存在以上%d个文件sha256不一致-------------------%n",results.size());
+        System.out.printf("计算并比对文件sha256结束，存在以下%d个文件sha256不一致%n",results.size());
+        FileTreePrinter.print(results);
+        System.out.printf("计算并比对文件sha256结束，存在以上%d个文件sha256不一致%n%n",results.size());
     }
 
     private static List<String> processBatch(List<Path> subList, Path basePath1, Path basePath2,
