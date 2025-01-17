@@ -9,6 +9,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.common.util.sha256.Sha256Util.calculateSHA256;
 
@@ -27,14 +28,14 @@ public class FolderComparator {
         Path basePath1 = Paths.get(path1);
         // 检查路径是否存在
         if (!Files.exists(basePath1)) {
-            System.out.printf("%s不存在",path1);
+            System.out.printf("%s不存在", path1);
             return;
         }
 
         Path basePath2 = Paths.get(path2);
         // 检查路径是否存在
         if (!Files.exists(basePath2)) {
-            System.out.printf("%s不存在",path2);
+            System.out.printf("%s不存在", path2);
             return;
         }
 
@@ -46,7 +47,7 @@ public class FolderComparator {
 
     }
 
-    private static  List<Path> collectFileDifferences(Path basePath1, Path basePath2) throws IOException {
+    private static List<Path> collectFileDifferences(Path basePath1, Path basePath2) throws IOException {
         List<String> inPath1NotInPath2Folder = new ArrayList<>();
         List<String> inPath2NotInPath1Folder = new ArrayList<>();
         List<String> inPath1NotInPath2File = new ArrayList<>();
@@ -112,39 +113,67 @@ public class FolderComparator {
 
     private static void printDiffInfo(Path basePath1, Path basePath2, List<String> inPath1NotInPath2Folder, List<String> inPath1NotInPath2File) {
         System.out.printf("%s目录结构读取完毕.%n", basePath1);
-        if(!inPath1NotInPath2Folder.isEmpty()&&PRINT_FOLDER_MISS){
-            System.out.printf("%s中不存在以下%d个文件夹：%n",basePath2,inPath1NotInPath2Folder.size());
+        if (!inPath1NotInPath2Folder.isEmpty() && PRINT_FOLDER_MISS) {
+            System.out.printf("%s中不存在以下%d个文件夹：%n", basePath2, inPath1NotInPath2Folder.size());
             inPath1NotInPath2Folder.forEach(System.out::println);
         }
-        if(!inPath1NotInPath2File.isEmpty()&PRINT_FILE_MISS){
-            System.out.printf("%s中不存在以下%d个文件：%n",basePath2,inPath1NotInPath2File.size());
+        if (!inPath1NotInPath2File.isEmpty() & PRINT_FILE_MISS) {
+            System.out.printf("%s中不存在以下%d个文件：%n", basePath2, inPath1NotInPath2File.size());
             inPath1NotInPath2File.forEach(System.out::println);
         }
         System.out.println();
     }
 
     private static void compareFilesInParallel(List<Path> commonFiles, Path basePath1, Path basePath2) {
-        if(!PRINT_FILE_DIFF){
+        if (!PRINT_FILE_DIFF) {
             return;
         }
-        System.out.println("正在比对文件差异中，以下为存在差异的文件：");
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        int batchSize = Math.max(1, commonFiles.size() / (threadCount * 4)); // 每批次处理的文件数
+        final int threadCount = Runtime.getRuntime().availableProcessors();
+        final int batchSize = Math.max(1, commonFiles.size() / (threadCount * 4)); // 每批次处理的文件数
+        AtomicInteger processedFiles = new AtomicInteger(0); // 进度计数器
+        final int totalFiles = commonFiles.size();
+
         CompletableFuture<?>[] futures = Lists.partition(commonFiles, batchSize).stream()
-                .map(subList -> CompletableFuture.runAsync(() -> processBatch(subList, basePath1, basePath2)))
+                .map(subList -> CompletableFuture.supplyAsync(() ->
+                        processBatch(subList, basePath1, basePath2, processedFiles, totalFiles)
+                ))
                 .toArray(CompletableFuture[]::new);
-        CompletableFuture.allOf(futures).join();
-        System.out.println("比对文件sha256结束.");
+
+        //汇总所有任务执行结果
+        List<String> results = CompletableFuture.allOf(futures).thenApply(a -> {
+            List<String> rs = new ArrayList<>();
+            for (CompletableFuture<?> future : futures) {
+                Object futureJoin = future.join();
+                if (futureJoin instanceof List<?> list) {
+                    if (!list.isEmpty()) {
+                        for (Object o : list) {
+                            if (o instanceof String str) {
+                                rs.add(str);
+                            }
+                        }
+                    }
+                }
+            }
+            return rs;
+        }).join();
+        results.forEach(System.out::println);
+        System.out.printf("%n-----------------比对文件sha256结束，存在以上%d个文件sha256不一致-------------------%n",results.size());
     }
 
-    private static void processBatch(List<Path> subList, Path basePath1, Path basePath2) {
-        subList.forEach(relativePath->{
+    private static List<String> processBatch(List<Path> subList, Path basePath1, Path basePath2,
+                                     AtomicInteger processedFiles, int total) {
+        List<String> notEqualFiles = Lists.newArrayList();
+        subList.forEach(relativePath -> {
             String hash1 = calculateSHA256(basePath1.resolve(relativePath));
             String hash2 = calculateSHA256(basePath2.resolve(relativePath));
-            if (!hash1.equals(hash2)&&PRINT_FILE_DIFF) {
-                System.out.println(relativePath);
+            if (!hash1.equals(hash2) && PRINT_FILE_DIFF) {
+                notEqualFiles.add(relativePath.toString());
             }
+            processedFiles.incrementAndGet();
+            System.out.printf("正在计算并比对sha256中，进度: %d/%d (%.2f%%)\r", processedFiles.get(), total,
+                    (processedFiles.get() * 100.0 / total));
         });
+        return notEqualFiles;
     }
 
 }
