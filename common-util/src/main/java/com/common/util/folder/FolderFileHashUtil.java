@@ -32,8 +32,9 @@ public class FolderFileHashUtil {
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 try {
-                    System.out.println("正在读取" + file.getName() + "中...");
-                    String sha256 = calculateSHA256(file.toPath());
+                    System.out.println("正在读取" + file.getName() + "并计算sha256中...");
+                    String sha256 = calculateSHA256(file.toPath(),true);
+                    System.out.println();
                     System.out.println("文件：" + file.getName());
                     System.out.println("SHA256：" + sha256);
                     String sha256FileName = file.getName() + "." + sha256 + "." + file.length() + ".sha256";
