@@ -102,4 +102,5 @@ public class FolderFileHashUtil {
         }
         return false;
     }
+
 }
