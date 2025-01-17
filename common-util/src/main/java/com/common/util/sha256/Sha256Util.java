@@ -22,7 +22,8 @@ public class Sha256Util {
 
             long fileSize = Files.size(file); // 获取文件总大小
             long totalRead = 0; // 已读取的字节数
-            long lastUpdateTime = System.currentTimeMillis(); // 上次更新时间
+            long startTime = System.currentTimeMillis(); // 开始时间
+            long lastUpdateTime = startTime; // 上次更新时间
             long updateInterval = 100; // 每 0.1 秒更新一次进度
 
             try (FileChannel channel = FileChannel.open(file, StandardOpenOption.READ)) {
@@ -37,7 +38,8 @@ public class Sha256Util {
                         totalRead += bytesRead; // 更新已读取的字节数
                         // 检查是否需要更新进度信息
                         if (currentTime - lastUpdateTime >= updateInterval || totalRead == fileSize) {
-                            printProgress(totalRead, fileSize); // 打印进度信息
+                            long totalReadTime = currentTime - startTime; // 读取时间
+                            printProgress(totalRead, fileSize, totalReadTime); // 打印进度信息
                             lastUpdateTime = currentTime; // 更新上次更新时间
                         }
                     }
@@ -50,16 +52,19 @@ public class Sha256Util {
         return "";
     }
 
-    private static void printProgress(long totalRead, long fileSize) {
+    private static void printProgress(long totalRead, long fileSize, long totalReadTime) {
         double progress = (double) totalRead / fileSize * 100; // 计算进度百分比
         String progressBar = getProgressBar(progress); // 获取进度条
         String sizeInfo = formatSize(totalRead) + "/" + formatSize(fileSize); // 格式化大小信息
+        String timeInfo = formatTime(totalReadTime); // 格式化总读取耗时
+        double averageSpeed = (double) totalRead / totalReadTime * 1000; // 计算平均读取速度（字节/秒）
+        String speedInfo = formatSpeed(averageSpeed); // 格式化平均读取速度
         // 打印进度信息
-        System.out.printf("\r%s %.2f%% (%s)", progressBar, progress, sizeInfo);
+        System.out.printf("\r%s %.2f%% (%s) [速度：%s，耗时：%s]", progressBar, progress, sizeInfo, speedInfo, timeInfo);
     }
 
     private static String getProgressBar(double progress) {
-        int barLength = 100; // 进度条长度
+        int barLength = 50; // 进度条长度
         int filledLength = (int) (progress / 100 * barLength); // 已填充的长度
         return "[" + "=".repeat(filledLength) + " ".repeat(barLength - filledLength) + "]";
     }
@@ -73,6 +78,32 @@ public class Sha256Util {
             return String.format("%.2f MB", size / (1024.0 * 1024)); // MB
         } else {
             return String.format("%.2f GB", size / (1024.0 * 1024 * 1024)); // GB
+        }
+    }
+
+    /**
+     * 格式化时间（按 ms 或 s 显示）
+     */
+    private static String formatTime(long timeMs) {
+        if (timeMs < 1000) {
+            return String.format("%d ms", timeMs); // 毫秒
+        } else {
+            return String.format("%.2f s", timeMs / 1000.0); // 秒
+        }
+    }
+
+    /**
+     * 格式化速度（按 KB/s、MB/s 或 GB/s 显示）
+     */
+    private static String formatSpeed(double speedBytesPerSecond) {
+        if (speedBytesPerSecond < 1024) {
+            return String.format("%.2f B/s", speedBytesPerSecond); // 字节/秒
+        } else if (speedBytesPerSecond < 1024 * 1024) {
+            return String.format("%.2f KB/s", speedBytesPerSecond / 1024); // KB/s
+        } else if (speedBytesPerSecond < 1024 * 1024 * 1024) {
+            return String.format("%.2f MB/s", speedBytesPerSecond / (1024 * 1024)); // MB/s
+        } else {
+            return String.format("%.2f GB/s", speedBytesPerSecond / (1024 * 1024 * 1024)); // GB/s
         }
     }
 
