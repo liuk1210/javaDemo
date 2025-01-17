@@ -12,7 +12,29 @@ public class FileTreePrinter {
 
         TreeNode(String name) {
             this.name = name;
-            this.children = new TreeMap<>(); // 使用TreeMap保证子节点顺序
+            this.children = new TreeMap<>();
+        }
+
+        // 新增：获取压缩后的路径名
+        String getCompressedName() {
+            StringBuilder path = new StringBuilder(name);
+            TreeNode current = this;
+            // 当节点只有一个子节点时，进行路径压缩
+            while (current.children.size() == 1) {
+                TreeNode child = current.children.values().iterator().next();
+                path.append("/").append(child.name);
+                current = child;
+            }
+            return path.toString();
+        }
+
+        // 新增：获取实际的子节点（跳过中间只有单个子节点的情况）
+        Map<String, TreeNode> getActualChildren() {
+            TreeNode current = this;
+            while (current.children.size() == 1) {
+                current = current.children.values().iterator().next();
+            }
+            return current.children;
         }
     }
 
@@ -65,15 +87,16 @@ public class FileTreePrinter {
             return;
         }
 
-        // 打印当前节点
+        // 打印当前节点（使用压缩后的路径名）
+        String displayName = node.getCompressedName();
         if (isLast) {
-            System.out.println(prefix + "└── " + node.name);
+            System.out.println(prefix + "└── " + displayName);
         } else {
-            System.out.println(prefix + "├── " + node.name);
+            System.out.println(prefix + "├── " + displayName);
         }
 
-        // 打印子节点
-        List<TreeNode> children = new ArrayList<>(node.children.values());
+        // 打印实际子节点（跳过中间节点）
+        List<TreeNode> children = new ArrayList<>(node.getActualChildren().values());
         for (int i = 0; i < children.size(); i++) {
             String newPrefix = prefix + (isLast ? "    " : "│   ");
             printTree(children.get(i), newPrefix, i == children.size() - 1);
