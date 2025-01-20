@@ -13,7 +13,7 @@ public class HtmlFileTreePrinter {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>文件目录</title>
+                <title>%s</title>
                 <style>
                     * {
                         margin: 0;
@@ -41,11 +41,24 @@ public class HtmlFileTreePrinter {
                         flex-direction: column;
                     }
             
-                    .search-wrapper {
+                    .header {
                         padding: 20px;
                         background: #fff;
                         border-bottom: 1px solid #e6e6e6;
                         flex-shrink: 0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+            
+                    .title {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #333;
+                    }
+            
+                    .search-wrapper {
+                        width: 300px;
                     }
             
                     .search-box {
@@ -167,14 +180,17 @@ public class HtmlFileTreePrinter {
             </head>
             <body>
                 <div class="container">
-                    <div class="search-wrapper">
-                        <div class="search-box">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" id="searchInput" placeholder="搜索">
+                    <div class="header">
+                        <div class="title">%s</div>
+                        <div class="search-wrapper">
+                            <div class="search-box">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="searchInput" placeholder="搜索">
+                            </div>
                         </div>
                     </div>
                     <div class="tree-container" id="fileTree">
-                        %1$s
+                        %s
                     </div>
                     <div class="no-results">
                         未找到相关内容
@@ -185,7 +201,7 @@ public class HtmlFileTreePrinter {
                             当前显示: <span id="visibleCount">0</span> 项
                         </div>
                         <select class="base-path-select" id="basePathSelect">
-                            %2$s
+                            %s
                         </select>
                     </div>
                 </div>
@@ -302,12 +318,12 @@ public class HtmlFileTreePrinter {
             </html>
             """;
 
-    public static void print(List<String> paths, List<String> basePaths) {
+    public static void print(List<String> paths, List<String> basePaths, String title) {
         TreeNode root = TreeNode.buildFileTree(paths);
         if (root == null) return;
 
         String basePathOptions = generateBasePathOptions(basePaths);
-        String htmlContent = generateHtmlTree(root, basePathOptions);
+        String htmlContent = generateHtmlTree(root, basePathOptions, title);
         File outputFile = writeHtmlFile(htmlContent);
         openInBrowser(outputFile);
     }
@@ -324,10 +340,10 @@ public class HtmlFileTreePrinter {
                 .collect(Collectors.joining("\n"));
     }
 
-    private static String generateHtmlTree(TreeNode node, String basePathOptions) {
+    private static String generateHtmlTree(TreeNode node, String basePathOptions, String title) {
         StringBuilder sb = new StringBuilder();
         generateHtmlTreeContent(node, sb);
-        return String.format(HTML_TEMPLATE, sb, basePathOptions);
+        return String.format(HTML_TEMPLATE, title, title, sb, basePathOptions);
     }
 
     private static void generateHtmlTreeContent(TreeNode node, StringBuilder sb) {

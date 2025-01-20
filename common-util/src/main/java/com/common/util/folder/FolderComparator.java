@@ -122,7 +122,8 @@ public class FolderComparator {
             if(PRINT_FILE_MISS){
                 System.out.printf("%s中缺失以下%d个文件/文件夹：%n", basePath2, all.size());
                 ConsoleFileTreePrinter.print(all);
-                HtmlFileTreePrinter.print(all, List.of(basePath2.toString()));
+                HtmlFileTreePrinter.print(all, List.of(basePath2.toString()), 
+                    String.format("%s中缺失的文件/文件夹", basePath2.getFileName()));
                 System.out.printf("%s中缺失以上%d个文件/文件夹：%n%n", basePath2, all.size());
             }
         }else{
@@ -169,7 +170,9 @@ public class FolderComparator {
            return;
         }
         ConsoleFileTreePrinter.print(results);
-        HtmlFileTreePrinter.print(results, Arrays.asList(basePath1.toString(),basePath2.toString()));
+        HtmlFileTreePrinter.print(results, 
+            Arrays.asList(basePath1.toString(), basePath2.toString()),
+            "SHA256不一致的文件");
         System.out.printf("计算并比对文件sha256结束，存在以上%d个文件sha256不一致%n%n",results.size());
     }
 
