@@ -234,9 +234,11 @@ public class HtmlFileTreePrinter {
                             item.addEventListener('click', function(e) {
                                 e.stopPropagation();
                                 const basePath = document.getElementById('basePathSelect').value;
-                                const relativePath = getNodePath(this);
-                                const fullPath = basePath + '/' + relativePath;
-                                window.open('file:///' + fullPath.replace(/\\\\/g, '/'), '_blank');
+                                const relativePath = this.getAttribute('data-path');
+                                if (relativePath) {
+                                    const fullPath = basePath + '/' + relativePath;
+                                    window.open('file:///' + fullPath.replace(/\\\\/g, '/'), '_blank');
+                                }
                             });
                         });
             
@@ -339,7 +341,12 @@ public class HtmlFileTreePrinter {
         String displayName = node.getCompressedName();
         boolean hasChildren = !node.getActualChildren().isEmpty();
 
-        sb.append("<div class='tree-item").append(hasChildren ? "" : " file").append("'>");
+        sb.append("<div class='tree-item")
+          .append(hasChildren ? "" : " file")
+          .append("' data-path='")
+          .append(node.getOriginalPath())
+          .append("'>");
+        
         if (hasChildren) {
             sb.append("<span class='arrow'></span>");
         }
