@@ -1,6 +1,7 @@
 package com.common.util.folder;
 
-import com.common.util.print.FileTreePrinter;
+import com.common.util.print.ConsoleFileTreePrinter;
+import com.common.util.print.HtmlFileTreePrinter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,8 +19,7 @@ import static com.common.util.sha256.Sha256Util.calculateSHA256;
 @Slf4j
 public class FolderComparator {
 
-    public static boolean PRINT_FOLDER_MISS = true;       //是否打印缺失文件夹
-    public static boolean PRINT_FILE_MISS = true;         //是否打印缺失文件
+    public static boolean PRINT_FILE_MISS = true;         //是否打印缺失文件/文件夹
     public static boolean PRINT_FILE_DIFF = true;         //是否打印差异文件
 
     public static void main(String[] args) throws IOException {
@@ -114,15 +115,18 @@ public class FolderComparator {
 
     private static void printDiffInfo(Path basePath1, Path basePath2, List<String> inPath1NotInPath2Folder, List<String> inPath1NotInPath2File) {
         System.out.printf("%s目录结构读取完毕.%n", basePath1);
-        if (!inPath1NotInPath2Folder.isEmpty() && PRINT_FOLDER_MISS) {
-            System.out.printf("%s中缺失以下%d个文件夹：%n", basePath2, inPath1NotInPath2Folder.size());
-            FileTreePrinter.print(inPath1NotInPath2Folder);
-            System.out.printf("%s中缺失以上%d个文件夹：%n%n", basePath2, inPath1NotInPath2Folder.size());
-        }
-        if (!inPath1NotInPath2File.isEmpty() & PRINT_FILE_MISS) {
-            System.out.printf("%s中缺失以下%d个文件：%n", basePath2, inPath1NotInPath2File.size());
-            FileTreePrinter.print(inPath1NotInPath2File);
-            System.out.printf("%s中缺失以上%d个文件：%n%n", basePath2, inPath1NotInPath2File.size());
+        List<String> all = new ArrayList<>();
+        all.addAll(inPath1NotInPath2Folder);
+        all.addAll(inPath1NotInPath2File);
+        if(!all.isEmpty()) {
+            if(PRINT_FILE_MISS){
+                System.out.printf("%s中缺失以下%d个文件/文件夹：%n", basePath2, all.size());
+                ConsoleFileTreePrinter.print(all);
+                HtmlFileTreePrinter.print(all, List.of(basePath2.toString()));
+                System.out.printf("%s中缺失以上%d个文件/文件夹：%n%n", basePath2, all.size());
+            }
+        }else{
+            System.out.println("%s中不存在文件/文件夹缺失.");
         }
         System.out.println();
     }
@@ -161,7 +165,11 @@ public class FolderComparator {
             return rs;
         }).join();
         System.out.printf("计算并比对文件sha256结束，存在以下%d个文件sha256不一致%n",results.size());
-        FileTreePrinter.print(results);
+        if(results.isEmpty()) {
+           return;
+        }
+        ConsoleFileTreePrinter.print(results);
+        HtmlFileTreePrinter.print(results, Arrays.asList(basePath1.toString(),basePath2.toString()));
         System.out.printf("计算并比对文件sha256结束，存在以上%d个文件sha256不一致%n%n",results.size());
     }
 
