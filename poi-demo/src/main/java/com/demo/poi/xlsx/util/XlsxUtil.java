@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
@@ -42,12 +43,12 @@ public class XlsxUtil {
      */
     public static final String TYPE_STRING = "string", TYPE_COMBOBOX = "combobox", TYPE_COMBOBOX_INDIRECT = "comboboxIndirect";
 
-    public static List<JSONObject> read(MultipartFile file) {
-        return read(file, 0, (String[]) null);
+    public static List<JSONObject> read(MultipartFile file,int titleStartRow, int titleRowNum) {
+        return readData(file, titleStartRow, titleRowNum, null);
     }
 
     //读取文件，title不为空就校验表头行
-    public static List<JSONObject> read(MultipartFile file, int titleStartRow, String[] title) {
+    public static List<JSONObject> readData(MultipartFile file, int titleStartRow, int titleRowNum, List<List<CellArg>> title) {
         List<JSONObject> rs = new ArrayList<>();
         if (file == null || file.isEmpty()) {
             return rs;
@@ -66,56 +67,141 @@ public class XlsxUtil {
         if (sheet.getPhysicalNumberOfRows() <= (1 + titleStartRow)) {//只有一行时默认为表头行不返回任何内容
             return rs;
         }
-        Row titleRow = sheet.getRow(titleStartRow);
-        if (title != null) {
+
+        if (title != null && !title.isEmpty()) {
+            //如果传入了表头行数据，则校验表头行并获取数据，表头行不正确则报错,表头列数以第一行为准
+            String[] titleValues = new String[title.get(0).size()];
             //校验表头行数据是否正确
-            for (int i = 0; i < title.length; i++) {
-                DataFormatter formatter = new DataFormatter();
-                String titleRowCellValue = formatter.formatCellValue(titleRow.getCell(i));
-                if (!StringUtils.equals(title[i], titleRowCellValue)) {
-                    throw new RuntimeException("导入模板有误，请勿修改模板表头行！");
+            for (int i = 0; i < title.size(); i++) {
+                Row titleRow = sheet.getRow(titleStartRow + i);
+                List<CellArg> cellArgs = title.get(i);
+                for (int j = 0; j < cellArgs.size(); j++) {
+                    CellArg cellArg = cellArgs.get(j);
+                    String titleRowCellValue = getMergedCellValue(sheet,titleRow,j);
+                    if (!StringUtils.equals(cellArg.getValue(), titleRowCellValue)) {
+                        throw new RuntimeException("导入模板有误，请勿修改模板表头行！");
+                    }
+                    titleValues[j] = titleValues[j] == null ? titleRowCellValue : titleValues[j] + "|" + titleRowCellValue;
                 }
             }
+            setData(sheet, rs, titleStartRow+titleRowNum, titleValues);
+        } else {
+            //如果没有传表头行，则按照表头行数取值
+            Row tr = sheet.getRow(titleStartRow);
+            if (tr == null) {
+                return rs;
+            }
+            int titleLength = tr.getLastCellNum();
+            String[] titleValues = new String[titleLength];
+            for (int i = 0; i < titleRowNum; i++) {
+                Row titleRow = sheet.getRow(titleStartRow + i);
+                for (int j = 0; j < titleLength; j++) {
+                    DataFormatter formatter = new DataFormatter();
+                    String titleRowCellValue = formatter.formatCellValue(titleRow.getCell(j));
+                    titleValues[j] = titleValues[j] == null ? titleRowCellValue : titleValues[j] + "|" + titleRowCellValue;
+                }
+            }
+            setData(sheet, rs, titleStartRow+titleRowNum, titleValues);
         }
-        for (int i = 1 + titleStartRow; i <= sheet.getLastRowNum(); i++) {
+        try {
+            workbook.close();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return rs;
+    }
+
+    /**
+     * 获取单元格的值（支持合并单元格）
+     *
+     * @param sheet 工作表
+     * @param row   行
+     * @param col   列索引
+     * @return 单元格的值，如果单元格为空则返回空字符串
+     */
+    public static String getMergedCellValue(Sheet sheet, Row row, int col) {
+        // 获取单元格
+        Cell cell = row.getCell(col);
+        if (cell != null) {
+            DataFormatter formatter = new DataFormatter();
+            // 检查单元格是否属于合并区域
+            for (CellRangeAddress mergedRegion : sheet.getMergedRegions()) {
+                if (mergedRegion.isInRange(row.getRowNum(), col)) {
+                    // 如果是合并区域，返回左上角单元格的值
+                    Row firstRow = sheet.getRow(mergedRegion.getFirstRow());
+                    Cell firstCell = firstRow.getCell(mergedRegion.getFirstColumn());
+                    return firstCell != null ?formatter.formatCellValue(firstCell) : "";
+                }
+            }
+            // 如果不是合并区域，直接返回单元格的值
+            return formatter.formatCellValue(cell);
+        }
+        // 如果单元格为空，返回空字符串
+        return "";
+    }
+
+    private static void setData(Sheet sheet, List<JSONObject> rs, int titleEndRow, String[] titleValues) {
+        String[] titles = new String[titleValues.length];
+        for(int i = 0; i < titleValues.length; i++) {
+            titles[i] = trimAndRemoveEmptyPipes(titleValues[i]);
+        }
+
+        for (int i = titleEndRow; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }
             JSONObject obj = new JSONObject();
             for (int j = 0; j < row.getLastCellNum(); j++) {
+                if (j >= titles.length) {
+                    //不获取超出标题行的数据
+                    continue;
+                }
                 Cell cell = row.getCell(j);
                 if (cell != null) {
                     DataFormatter formatter = new DataFormatter();
                     String cellValue = formatter.formatCellValue(cell);
-                    String titleRowCellValue = formatter.formatCellValue(titleRow.getCell(j));
+                    String titleRowCellValue = titles[j];
                     obj.put(titleRowCellValue, cellValue);
                 }
             }
             rs.add(obj);
         }
-        try {
-            workbook.close();
-        } catch (Exception e) {
-            log.error("未知错误", e);
-        }
-        return rs;
     }
 
     /**
-     * 读取文件并校验表头
+     * 去除字符串首尾的 | 以及中间为空的 ||
+     *
+     * @param input 输入字符串
+     * @return 处理后的字符串
+     */
+    public static String trimAndRemoveEmptyPipes(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // 去除首尾的 |
+        input = input.replaceAll("^\\|+|\\|+$", "");
+
+        // 去除中间为空的 ||
+        input = input.replaceAll("\\|\\|", "|");
+
+        return input;
+    }
+
+    /**
+     * 读取多行表头的数据
      *
      * @param file          文件
-     * @param titleStartRow 表头开始行，从0开始
-     * @param headerCols    表头列信息
-     * @return 表头为key的json数组
+     * @param titleStartRow 头开始行，从0开始
+     * @param title         表头列信息
+     * @return 表头为key的json数组  多行表头中间以 - 分割
      */
-    public static List<JSONObject> read(MultipartFile file, int titleStartRow, List<CellArg> headerCols) {
+    public static List<JSONObject> read(MultipartFile file, int titleStartRow, List<List<CellArg>> title) {
         if (file == null || file.isEmpty()) {
             return new ArrayList<>();
         }
-        String[] title = headerCols.stream().map(CellArg::getValue).toArray(String[]::new);
-        return read(file, titleStartRow, title);
+        return readData(file,titleStartRow,title.size(),title);
     }
 
     /**
@@ -158,10 +244,10 @@ public class XlsxUtil {
             index++;
         }
         //初始化数据行
-        for(JSONObject obj : dataList) {
+        for (JSONObject obj : dataList) {
             rowIndex++;
             Row row = sheet.createRow(rowIndex);
-            for(int i=0;i<title.size();i++){
+            for (int i = 0; i < title.size(); i++) {
                 Cell cell = row.createCell(i);
                 cell.setCellValue(obj.getString(title.get(i)));
             }
@@ -221,7 +307,8 @@ public class XlsxUtil {
         //3.初始化表头，因为下拉框数据重复设置时第一次赋值的才有效
         for (int i = 0; i < title.size(); i++) {
             List<CellArg> cellArgs = title.get(i);
-            initRow(sheet.createRow(i + titleStartRow), cellArgs, false, styleMap);
+            XSSFRow row = sheet.createRow(i + titleStartRow);
+            initRow(row, cellArgs, false, styleMap);
             //仅在最后一行表头初始化完毕后执行
             if (i == title.size() - 1) {
                 //默认初始化200行的下拉框，从数据开始行开始初始化
@@ -232,6 +319,8 @@ public class XlsxUtil {
                 }
             }
         }
+        //3.1合并横向、纵向值相同的表头
+        XlsxTitleMergerUtil.mergeHorizontalAndVerticalCells(sheet, title);
         //4.合并单元格
         if (CollectionUtils.isNotEmpty(arg.getMergedCellRangeAddress())) {
             arg.getMergedCellRangeAddress().forEach(sheet::addMergedRegion);
@@ -512,8 +601,13 @@ public class XlsxUtil {
         style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFillForegroundColor(IndexedColors.AQUA.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setBorderTop(BorderStyle.THIN); // 上边框
+        style.setBorderBottom(BorderStyle.THIN); // 下边框
+        style.setBorderLeft(BorderStyle.THIN); // 左边框
+        style.setBorderRight(BorderStyle.THIN); // 右边框
         return style;
     }
+
 
     private static XSSFCellStyle initRedFontStyle(XSSFWorkbook workbook) {
         XSSFCellStyle style = workbook.createCellStyle();

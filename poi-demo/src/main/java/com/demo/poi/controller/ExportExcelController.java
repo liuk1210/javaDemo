@@ -2,6 +2,7 @@ package com.demo.poi.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.service.ExportExcelService;
+import com.demo.poi.xlsx.arg.SheetArg;
 import com.demo.poi.xlsx.util.XlsxUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,9 +31,19 @@ public class ExportExcelController {
     }
 
     @PostMapping(value = "readXlsx", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json，仅适用标准第一行为标题其他行为数据的场景")
-    public List<JSONObject> readXlsx(@RequestParam("file") MultipartFile file) {
-        return XlsxUtil.read(file);
+    @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json")
+    public List<JSONObject> readXlsx(@RequestParam("file") MultipartFile file,
+                                     @RequestParam("titleStartRow") int titleStartRow,
+                                     @RequestParam("titleRowNum") int titleRowNum) {
+        return XlsxUtil.read(file, titleStartRow, titleRowNum);
+    }
+
+    @PostMapping(value = "readXlsxAndCheckTitleDemo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json，同时校验表头")
+    public List<JSONObject> readXlsxAndCheckTitleDemo(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam("titleStartRow") int titleStartRow) {
+        SheetArg arg = exportExcelService.getSheetArg("sheet1");
+        return XlsxUtil.read(file, titleStartRow, arg.getTitle());
     }
 
     @PostMapping(value = "/demo")

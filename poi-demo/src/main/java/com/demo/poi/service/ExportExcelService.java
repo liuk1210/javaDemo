@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,22 +30,41 @@ public class ExportExcelService {
     }
 
     public void exportDemo(HttpServletResponse response) {
+        SheetArg arg = getSheetArg("sheet1");
+        XlsxUtil.export("demo.xlsx", arg, response);
+    }
+
+    public SheetArg getSheetArg(String sheetName) {
         SheetArg arg = new SheetArg();
         arg.setName("sheet1");
-        List<CellArg> title = new ArrayList<>();
-        title.add(CellArg.getInstance().title().key("k1").value("考核年度")
-                .combobox(new String[]{"年度","月度","季度"}));
-        Map<String, String[]> map = new HashMap<>();
-        map.put("年度",new String[]{"2023年","2024年"});
-        map.put("月度",new String[]{"1月","2月"});
-        map.put("季度",new String[]{"1-3月","1-6月","1-9月","1-12月"});
-        title.add(CellArg.getInstance().title().key("k2").value("考核期间")
-                .comboboxIndirect(1,map,"_khqj")
-        );
-        title.add(CellArg.getInstance().title().key("k3").value("列3")
-                .combobox(new String[]{"个人绩效","团队绩效"}));
-        arg.addTitleRow(title);
-        XlsxUtil.export("demo.xlsx", arg, response);
+        List<CellArg> title1 = new ArrayList<>();
+        title1.add( CellArg.getInstance().title().value("序号"));
+        title1.add( CellArg.getInstance().title().value("分类"));
+        title1.add( CellArg.getInstance().title().value("分类"));
+        title1.add( CellArg.getInstance().title().value("分类"));
+        title1.add( CellArg.getInstance().title().value("其他"));
+        title1.add( CellArg.getInstance().title().value("其他"));
+        arg.addTitleRow( title1 );
+
+        List<CellArg> title2 = new ArrayList<>();
+        title2.add( CellArg.getInstance().title().value("序号"));
+        title2.add( CellArg.getInstance().title().value("分类1"));
+        title2.add( CellArg.getInstance().title().value("分类2"));
+        title2.add( CellArg.getInstance().title().value("分类2"));
+        title2.add( CellArg.getInstance().title().value("其他1"));
+        title2.add( CellArg.getInstance().title().value("其他2"));
+        arg.addTitleRow( title2 );
+
+        List<CellArg> title3 = new ArrayList<>();
+        title3.add( CellArg.getInstance().title().value("序号"));
+        title3.add( CellArg.getInstance().title().value("分类1"));
+        title3.add( CellArg.getInstance().title().value("分类2-1"));
+        title3.add( CellArg.getInstance().title().value("分类2-2"));
+        title3.add( CellArg.getInstance().title().value("其他1"));
+        title3.add( CellArg.getInstance().title().value("其他2"));
+        arg.addTitleRow(title3);
+
+        return arg;
     }
 
 }
