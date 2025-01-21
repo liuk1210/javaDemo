@@ -1,12 +1,10 @@
 package com.demo.poi.xlsx.arg;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.demo.poi.xlsx.annotations.XlsxColumn;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,28 +46,6 @@ public class SheetArg {
             }
         }
         this.title.add(cells);
-        return this;
-    }
-
-    public SheetArg initTitleRow(Class<?> clazz) {
-        if (clazz != null) {
-            Field[] fields = clazz.getDeclaredFields();
-            List<CellArg> titleRow = new ArrayList<>();
-            for (Field field : fields) {
-                XlsxColumn column = field.getAnnotation(XlsxColumn.class);
-                if (column == null) {
-                    continue;
-                }
-                titleRow.add(CellArg.getInstance()
-                        .columnWidth(column.width())
-                        .title()
-                        .key(field.getName())
-                        .annotations(column.annotations())
-                        .value(column.value())
-                        .combobox(column.combobox()));
-            }
-            this.title.add(titleRow);
-        }
         return this;
     }
 

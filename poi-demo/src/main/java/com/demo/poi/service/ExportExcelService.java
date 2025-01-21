@@ -44,7 +44,6 @@ public class ExportExcelService {
         title1.add( CellArg.getInstance().title().value("分类"));
         title1.add( CellArg.getInstance().title().value("其他"));
         title1.add( CellArg.getInstance().title().value("其他"));
-        arg.addTitleRow( title1 );
 
         List<CellArg> title2 = new ArrayList<>();
         title2.add( CellArg.getInstance().title().value("序号"));
@@ -53,7 +52,6 @@ public class ExportExcelService {
         title2.add( CellArg.getInstance().title().value("分类2"));
         title2.add( CellArg.getInstance().title().value("其他1"));
         title2.add( CellArg.getInstance().title().value("其他2"));
-        arg.addTitleRow( title2 );
 
         List<CellArg> title3 = new ArrayList<>();
         title3.add( CellArg.getInstance().title().value("序号"));
@@ -62,7 +60,8 @@ public class ExportExcelService {
         title3.add( CellArg.getInstance().title().value("分类2-2"));
         title3.add( CellArg.getInstance().title().value("其他1"));
         title3.add( CellArg.getInstance().title().value("其他2"));
-        arg.addTitleRow(title3);
+
+        arg.addTitleRow(title1).addTitleRow(title2).addTitleRow(title3);
 
         return arg;
     }
