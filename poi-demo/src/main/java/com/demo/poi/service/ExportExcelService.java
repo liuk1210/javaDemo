@@ -36,7 +36,7 @@ public class ExportExcelService {
 
     public SheetArg getSheetArg(String sheetName) {
         SheetArg arg = new SheetArg();
-        arg.setName("sheet1");
+        arg.setName(sheetName);
         List<CellArg> title1 = new ArrayList<>();
         title1.add( CellArg.getInstance().title().value("序号"));
         title1.add( CellArg.getInstance().title().value("分类"));
@@ -54,12 +54,12 @@ public class ExportExcelService {
         title2.add( CellArg.getInstance().title().value("其他2"));
 
         List<CellArg> title3 = new ArrayList<>();
-        title3.add( CellArg.getInstance().title().value("序号"));
-        title3.add( CellArg.getInstance().title().value("分类1"));
-        title3.add( CellArg.getInstance().title().value("分类2-1"));
-        title3.add( CellArg.getInstance().title().value("分类2-2"));
-        title3.add( CellArg.getInstance().title().value("其他1"));
-        title3.add( CellArg.getInstance().title().value("其他2"));
+        title3.add( CellArg.getInstance().title().value("序号").key("xh"));
+        title3.add( CellArg.getInstance().title().value("分类1").key("fl1"));
+        title3.add( CellArg.getInstance().title().value("分类2-1").key("fl2-1"));
+        title3.add( CellArg.getInstance().title().value("分类2-2").key("fl2-2"));
+        title3.add( CellArg.getInstance().title().value("其他1").key("qt1"));
+        title3.add( CellArg.getInstance().title().value("其他2").key("qt2"));
 
         arg.addTitleRow(title1).addTitleRow(title2).addTitleRow(title3);
 

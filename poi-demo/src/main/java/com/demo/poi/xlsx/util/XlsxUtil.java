@@ -70,7 +70,7 @@ public class XlsxUtil {
 
         if (title != null && !title.isEmpty()) {
             //如果传入了表头行数据，则校验表头行并获取数据，表头行不正确则报错,表头列数以第一行为准
-            String[] titleValues = new String[title.get(0).size()];
+            String[] titleKey = new String[title.get(0).size()];
             //校验表头行数据是否正确
             for (int i = 0; i < title.size(); i++) {
                 Row titleRow = sheet.getRow(titleStartRow + i);
@@ -81,10 +81,12 @@ public class XlsxUtil {
                     if (!StringUtils.equals(cellArg.getValue(), titleRowCellValue)) {
                         throw new RuntimeException("导入模板有误，请勿修改模板表头行！");
                     }
-                    titleValues[j] = titleValues[j] == null ? titleRowCellValue : titleValues[j] + "|" + titleRowCellValue;
+                    if(i==title.size()-1){
+                        titleKey[j] = cellArg.getKey();
+                    }
                 }
             }
-            setData(sheet, rs, titleStartRow+titleRowNum, titleValues);
+            setData(sheet, rs, titleStartRow+titleRowNum, titleKey);
         } else {
             //如果没有传表头行，则按照表头行数取值
             Row tr = sheet.getRow(titleStartRow);
@@ -101,7 +103,11 @@ public class XlsxUtil {
                     titleValues[j] = titleValues[j] == null ? titleRowCellValue : titleValues[j] + "|" + titleRowCellValue;
                 }
             }
-            setData(sheet, rs, titleStartRow+titleRowNum, titleValues);
+            String[] titles = new String[titleValues.length];
+            for(int i = 0; i < titleValues.length; i++) {
+                titles[i] = trimAndRemoveEmptyPipes(titleValues[i]);
+            }
+            setData(sheet, rs, titleStartRow+titleRowNum, titles);
         }
         try {
             workbook.close();
@@ -141,11 +147,6 @@ public class XlsxUtil {
     }
 
     private static void setData(Sheet sheet, List<JSONObject> rs, int titleEndRow, String[] titleValues) {
-        String[] titles = new String[titleValues.length];
-        for(int i = 0; i < titleValues.length; i++) {
-            titles[i] = trimAndRemoveEmptyPipes(titleValues[i]);
-        }
-
         for (int i = titleEndRow; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
             if (row == null) {
@@ -153,7 +154,7 @@ public class XlsxUtil {
             }
             JSONObject obj = new JSONObject();
             for (int j = 0; j < row.getLastCellNum(); j++) {
-                if (j >= titles.length) {
+                if (j >= titleValues.length) {
                     //不获取超出标题行的数据
                     continue;
                 }
@@ -161,7 +162,7 @@ public class XlsxUtil {
                 if (cell != null) {
                     DataFormatter formatter = new DataFormatter();
                     String cellValue = formatter.formatCellValue(cell);
-                    String titleRowCellValue = titles[j];
+                    String titleRowCellValue = titleValues[j];
                     obj.put(titleRowCellValue, cellValue);
                 }
             }
