@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.dao.ExportExcelDao;
 import com.demo.poi.xlsx.arg.CellArg;
 import com.demo.poi.xlsx.arg.SheetArg;
-import com.demo.poi.xlsx.util.XlsxUtil;
+import com.demo.poi.xlsx.util.XlsxExporter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +24,17 @@ public class ExportExcelService {
         List<JSONObject> list = exportExcelDao.list(sql);
         long end = System.currentTimeMillis();
         log.info("数据库查询耗时：{}ms", end - start);
-        XlsxUtil.exportBigData("导出数据.xlsx", list, response);
+        XlsxExporter.exportBigData("导出数据.xlsx", list, response);
         long now = System.currentTimeMillis();
         log.info("导出excel耗时{}ms", now - end);
     }
 
     public void exportDemo(HttpServletResponse response) {
         SheetArg arg = getSheetArg("sheet1");
-        XlsxUtil.export("demo.xlsx", arg, response);
+        XlsxExporter.export("demo.xlsx", arg, response);
     }
 
-    public SheetArg getSheetArg(String sheetName) {
+    public static SheetArg getSheetArg(String sheetName) {
         SheetArg arg = new SheetArg();
         arg.setName(sheetName);
         List<CellArg> title1 = new ArrayList<>();
@@ -64,6 +64,12 @@ public class ExportExcelService {
         arg.addTitleRow(title1).addTitleRow(title2).addTitleRow(title3);
 
         return arg;
+    }
+
+    public static void main(String[] args) {
+        //导出到本地文件
+        SheetArg arg = getSheetArg("sheet1");
+        XlsxExporter.export("demo.xlsx", arg);
     }
 
 }

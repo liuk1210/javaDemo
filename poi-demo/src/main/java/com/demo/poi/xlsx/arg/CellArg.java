@@ -1,7 +1,7 @@
 package com.demo.poi.xlsx.arg;
 
 import com.demo.poi.xlsx.util.XlsxCellStyle;
-import com.demo.poi.xlsx.util.XlsxUtil;
+import com.demo.poi.xlsx.util.XlsxExporter;
 import lombok.Getter;
 
 import java.util.Map;
@@ -79,7 +79,7 @@ public class CellArg {
     public static CellArg getInstance() {
         CellArg instance = new CellArg();
         instance.columnWidth = 3000;
-        instance.type = XlsxUtil.TYPE_STRING;
+        instance.type = XlsxExporter.TYPE_STRING;
         instance.style = XlsxCellStyle.STYLE_NORMAL;
         instance.wrapText = false;
         return instance;
@@ -140,7 +140,7 @@ public class CellArg {
     }
 
     public CellArg combobox(String[] comboboxOptions) {
-        this.type = XlsxUtil.TYPE_COMBOBOX;
+        this.type = XlsxExporter.TYPE_COMBOBOX;
         this.comboboxOptions = comboboxOptions;
         return this;
     }
@@ -155,7 +155,7 @@ public class CellArg {
     public CellArg comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap,String cascadeNameNameSuffix) {
         this.cascadeColIndex = cascadeColIndex;
         this.comboboxSubOptionMap = comboboxSubOptionMap;
-        this.type = XlsxUtil.TYPE_COMBOBOX_INDIRECT;
+        this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
         this.cascadeNameNameSuffix = cascadeNameNameSuffix;
         return this;
     }
@@ -163,7 +163,7 @@ public class CellArg {
     public CellArg comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap) {
         this.cascadeColIndex = cascadeColIndex;
         this.comboboxSubOptionMap = comboboxSubOptionMap;
-        this.type = XlsxUtil.TYPE_COMBOBOX_INDIRECT;
+        this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
         this.cascadeNameNameSuffix = "";
         return this;
     }

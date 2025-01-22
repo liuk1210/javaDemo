@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * excel导出工具类
  */
 @Slf4j
-public class XlsxUtil {
+public class XlsxExporter {
 
     /**
      * 单元格数据展示类型
@@ -32,7 +32,7 @@ public class XlsxUtil {
     public static final String TYPE_STRING = "string", TYPE_COMBOBOX = "combobox", TYPE_COMBOBOX_INDIRECT = "comboboxIndirect";
 
     /**
-     * 单sheet导出
+     * 单sheet导出，用于web服务下载导出的文件
      *
      * @param fileName 文件名称
      * @param arg      参数
@@ -40,6 +40,16 @@ public class XlsxUtil {
      */
     public static void export(String fileName, SheetArg arg, HttpServletResponse response) {
         download(fileName, response, exportExcel(arg));
+    }
+
+    /**
+     * 单sheet导出，用于本地调试生成文件到本地
+     * @param filePath 本地保存xlsx文件的路径
+     * @param arg 参数
+     */
+    public static void export(String filePath, SheetArg arg) {
+        XSSFWorkbook wb = exportExcel(arg);
+        XlsxFileWriter.writeWorkbookToFile(wb,filePath);
     }
 
     /**
