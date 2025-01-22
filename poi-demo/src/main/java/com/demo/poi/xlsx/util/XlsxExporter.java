@@ -12,9 +12,6 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +36,7 @@ public class XlsxExporter {
      * @param response 响应
      */
     public static void export(String fileName, SheetArg arg, HttpServletResponse response) {
-        download(fileName, response, exportExcel(arg));
+        XlsxFileDownloader.download(fileName, response, exportExcel(arg));
     }
 
     /**
@@ -60,7 +57,7 @@ public class XlsxExporter {
      * @param response 响应
      */
     public static void exportBigData(String fileName, List<JSONObject> dataList, HttpServletResponse response) {
-        download(fileName, response, exportBigExcel(dataList));
+        XlsxFileDownloader.download(fileName, response, exportBigExcel(dataList));
     }
 
     private static SXSSFWorkbook exportBigExcel(List<JSONObject> dataList) {
@@ -90,23 +87,6 @@ public class XlsxExporter {
             }
         }
         return workbook;
-    }
-
-    //下载文件
-    private static void download(String fileName, HttpServletResponse response, Workbook wb) {
-        try {
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("content-Type", "application/vnd.ms-excel");
-            response.setHeader("Content-Disposition",
-                    "attachment;filename=" + URLEncoder.encode(fileName, String.valueOf(StandardCharsets.UTF_8)));
-            wb.write(response.getOutputStream());
-            if (wb instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
-            }
-            wb.close();
-        } catch (IOException e) {
-            log.error("下载文件异常", e);
-        }
     }
 
     //单个sheet导出
