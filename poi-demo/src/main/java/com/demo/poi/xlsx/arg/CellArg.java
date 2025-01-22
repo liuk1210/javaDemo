@@ -1,5 +1,6 @@
 package com.demo.poi.xlsx.arg;
 
+import com.demo.poi.xlsx.util.XlsxCellStyle;
 import com.demo.poi.xlsx.util.XlsxUtil;
 import lombok.Getter;
 
@@ -79,18 +80,18 @@ public class CellArg {
         CellArg instance = new CellArg();
         instance.columnWidth = 3000;
         instance.type = XlsxUtil.TYPE_STRING;
-        instance.style = XlsxUtil.STYLE_NORMAL;
+        instance.style = XlsxCellStyle.STYLE_NORMAL;
         instance.wrapText = false;
         return instance;
     }
 
     public CellArg readonly() {
-        this.style = XlsxUtil.STYLE_READONLY;
+        this.style = XlsxCellStyle.STYLE_READONLY;
         return this;
     }
 
     public CellArg error() {
-        this.style = XlsxUtil.STYLE_ERROR;
+        this.style = XlsxCellStyle.STYLE_ERROR;
         return this;
     }
 
@@ -109,7 +110,7 @@ public class CellArg {
     }
 
     public CellArg title() {
-        this.style = XlsxUtil.STYLE_TITLE;
+        this.style = XlsxCellStyle.STYLE_TITLE;
         return this;
     }
 
@@ -168,12 +169,12 @@ public class CellArg {
     }
 
     public CellArg redFont() {
-        this.style = XlsxUtil.STYLE_RED_FONT;
+        this.style = XlsxCellStyle.STYLE_RED_FONT;
         return this;
     }
 
     public CellArg leftTop() {
-        this.style = XlsxUtil.STYLE_LEFT_TOP;
+        this.style = XlsxCellStyle.STYLE_LEFT_TOP;
         return this;
     }
 

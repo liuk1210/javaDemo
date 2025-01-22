@@ -8,7 +8,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.List;
 
-public class XlsxTitleMergerUtil {
+public class XlsxTitleMerger {
 
     /**
      * 合并横向和纵向的重复单元格

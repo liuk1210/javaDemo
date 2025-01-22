@@ -3,7 +3,7 @@ package com.demo.poi.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.service.ExportExcelService;
 import com.demo.poi.xlsx.arg.SheetArg;
-import com.demo.poi.xlsx.util.XlsxUtil;
+import com.demo.poi.xlsx.util.XlsxReader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,7 +35,7 @@ public class ExportExcelController {
     public List<JSONObject> readXlsx(@RequestParam("file") MultipartFile file,
                                      @RequestParam("titleStartRow") int titleStartRow,
                                      @RequestParam("titleRowNum") int titleRowNum) {
-        return XlsxUtil.read(file, titleStartRow, titleRowNum);
+        return XlsxReader.read(file, titleStartRow, titleRowNum);
     }
 
     @PostMapping(value = "readXlsxAndCheckTitleDemo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,7 +43,7 @@ public class ExportExcelController {
     public List<JSONObject> readXlsxAndCheckTitleDemo(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("titleStartRow") int titleStartRow) {
         SheetArg arg = exportExcelService.getSheetArg("sheet1");
-        return XlsxUtil.read(file, titleStartRow, arg.getTitle());
+        return XlsxReader.read(file, titleStartRow, arg.getTitle());
     }
 
     @PostMapping(value = "/demo")
