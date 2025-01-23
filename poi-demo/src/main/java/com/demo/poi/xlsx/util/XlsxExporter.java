@@ -253,6 +253,9 @@ public class XlsxExporter {
                 }
                 break;
             case TYPE_COMBOBOX_INDIRECT:
+                if(cellArg.getComboboxSubOptionMap() == null || cellArg.getComboboxSubOptionMap().isEmpty()) {
+                    break;
+                }
                 //3为级联下拉
                 addIndirectValidationDataOptions(sheet, cellArg, optionStartRow, optionEndRow, columnIndex);
                 break;
@@ -282,17 +285,13 @@ public class XlsxExporter {
 
     //生成sheet的方式做下拉框，可解决枚举值超过255个字符的问题，此列可作为被级联的列，被级联时需要使用此方式
     private static void addSheetValidationDataOptions(XSSFSheet sheet, CellArg cellArg, int optionStartRow, int optionEndRow, int columnIndex) {
-        //所有枚举值的下拉框都默认创建或者使用已存在的sheet
-        String optionSheetName = "hs_" + cellArg.getKey();
-        XSSFSheet optionSheet = sheet.getWorkbook().getSheet(optionSheetName);
-        if (optionSheet == null) {
-            //使用列key作为隐藏sheet名称，避免重复创建过多隐藏sheet
-            optionSheet = sheet.getWorkbook().createSheet(optionSheetName);
-        }
+        //创建一个sheet存储枚举值的下拉框数据
+        XSSFSheet optionSheet = sheet.getWorkbook().createSheet();
+        String optionSheetName = optionSheet.getSheetName();
         //隐藏下拉框sheet
         sheet.getWorkbook().setSheetHidden(sheet.getWorkbook().getSheetIndex(optionSheetName), true);
 
-        //如果不是级联下拉选项，直接按照枚举值初始化
+        //直接按照枚举值初始化
         String[] options = cellArg.getComboboxOptions();
         for (int i = 0; i < options.length; i++) {
             XSSFRow row = optionSheet.createRow(i);
@@ -311,66 +310,64 @@ public class XlsxExporter {
 
     //级联下拉框
     private static void addIndirectValidationDataOptions(XSSFSheet sheet, CellArg cellArg, int optionStartRow, int optionEndRow, int columnIndex) {
-        //所有枚举值的下拉框都默认创建或者使用已存在的sheet
-        String optionSheetName = "hs_" + cellArg.getKey();
-        XSSFSheet optionSheet = sheet.getWorkbook().getSheet(optionSheetName);
-        if (optionSheet == null) {
-            //使用列key作为隐藏sheet名称，避免重复创建过多隐藏sheet
-            optionSheet = sheet.getWorkbook().createSheet(optionSheetName);
-        }
+        //创建一个sheet存储枚举值的级联下拉框数据
+        XSSFSheet optionSheet = sheet.getWorkbook().createSheet();
+        String optionSheetName = optionSheet.getSheetName();
         //隐藏下拉框sheet
         sheet.getWorkbook().setSheetHidden(sheet.getWorkbook().getSheetIndex(optionSheetName), true);
 
-        //如果是级联下拉选项，则需初始化一个 excel公式-指定名称，作为列表源
+        //初始化一个 excel公式-指定名称，作为列表源
         Map<String, String[]> indirectArgs = cellArg.getComboboxSubOptionMap();
-        if (indirectArgs != null) {
-            int index = 0;
-            for (String key : indirectArgs.keySet()) {
-                XSSFRow row = optionSheet.createRow(index);
-                Cell cell = row.createCell(0);
-                cell.setCellValue(key);
-                //创建子项
-                String[] subName = indirectArgs.get(key);
-                if (subName != null) {
-                    for (int j = 0; j < subName.length; j++) {
-                        Cell subCell = row.createCell(j + 1);
-                        subCell.setCellValue(subName[j]);
-                    }
-                    //每一个创建一个excel的名称
-                    Name name = sheet.getWorkbook().createName();
-                    String nameName = key + cellArg.getCascadeNameNameSuffix();
-                    nameName = nameName.replaceAll("/", "");
-                    name.setNameName(nameName);
-                    int maxCol;
-                    if (subName.length == 0) {
-                        //如果子选项为空，则默认给一个空格选项
-                        maxCol = 2;
-                    } else {
-                        maxCol = subName.length + 1;
-                    }
-                    String formula = optionSheetName + "!" + "$B$" + (index + 1)
-                            + ":$" + convertToColumnName(maxCol) + "$" + (index + 1);
-                    name.setRefersToFormula(formula);
+
+        int index = 0;
+        String nameNamePrefix = "n_";
+        //用当前名称数量作为后缀
+        int nameNameSuffix = sheet.getWorkbook().getNumberOfNames();
+        for (String key : indirectArgs.keySet()) {
+            XSSFRow row = optionSheet.createRow(index);
+            Cell cell = row.createCell(0);
+            cell.setCellValue(key);
+            //创建子项
+            String[] subName = indirectArgs.get(key);
+            if (subName != null) {
+                for (int j = 0; j < subName.length; j++) {
+                    Cell subCell = row.createCell(j + 1);
+                    subCell.setCellValue(subName[j]);
                 }
-                index++;
+                //每一个创建一个excel的名称
+                Name name = sheet.getWorkbook().createName();
+                String nameName = nameNamePrefix + key + nameNameSuffix;
+                nameName = nameName.replaceAll("/", "");
+                name.setNameName(nameName);
+                int maxCol;
+                if (subName.length == 0) {
+                    //如果子选项为空，则默认给一个空格选项
+                    maxCol = 2;
+                } else {
+                    maxCol = subName.length + 1;
+                }
+                String formula = optionSheetName + "!" + "$B$" + (index + 1)
+                        + ":$" + convertToColumnName(maxCol) + "$" + (index + 1);
+                name.setRefersToFormula(formula);
             }
-
-            DataValidationHelper help = new XSSFDataValidationHelper(sheet);
-            //每个单元格单独创建校验
-            for (int i = optionStartRow; i <= optionEndRow; i++) {
-                //将字符串/替换成空格，excel中name不支持/
-                String substitute = "SUBSTITUTE($" + convertToColumnName(cellArg.getCascadeColIndex()) + "$" + (i + 1)
-                        + "&\"" + cellArg.getCascadeNameNameSuffix() + "\",\"/\",\"\")";
-                DataValidation childValidation = help.createValidation(
-                        help.createFormulaListConstraint(
-                                "INDIRECT(" + substitute + ")"),
-                        new CellRangeAddressList(i, i, columnIndex, columnIndex));
-                childValidation.setShowErrorBox(true);
-                childValidation.setSuppressDropDownArrow(true);
-                sheet.addValidationData(childValidation);
-            }
-
+            index++;
         }
+
+        DataValidationHelper help = new XSSFDataValidationHelper(sheet);
+        //每个单元格单独创建校验
+        for (int i = optionStartRow; i <= optionEndRow; i++) {
+            //将字符串/替换成空格，excel中name不支持/
+            String substitute = "SUBSTITUTE(\"" + nameNamePrefix + "\"&$" + convertToColumnName(cellArg.getCascadeColIndex()) + "$" + (i + 1)
+                    + "&\"" + nameNameSuffix + "\",\"/\",\"\")";
+            DataValidation childValidation = help.createValidation(
+                    help.createFormulaListConstraint(
+                            "INDIRECT(" + substitute + ")"),
+                    new CellRangeAddressList(i, i, columnIndex, columnIndex));
+            childValidation.setShowErrorBox(true);
+            childValidation.setSuppressDropDownArrow(true);
+            sheet.addValidationData(childValidation);
+        }
+
     }
 
     //列索引转换成excel的列

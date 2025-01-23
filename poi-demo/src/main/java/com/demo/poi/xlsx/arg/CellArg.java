@@ -45,21 +45,15 @@ public class CellArg {
     private String type;
 
     /**
-     * 下拉列表可选项
-     */
-    private String[] comboboxOptions;
-
-    /**
      * 级联下拉框参数
      * 级联哪一列，index从1开始
      */
     private int cascadeColIndex;
 
     /**
-     * 级联下拉框INDIRECT函数拼接字典名称的后缀
-     * 例: =INDIRECT(SUBSTITUTE($C$2&"_changeReasonName","/","")) 其中的 _changeReasonName
+     * 下拉列表可选项
      */
-    private String cascadeNameNameSuffix;
+    private String[] comboboxOptions;
 
     /**
      * 级联下拉框参数
@@ -147,24 +141,14 @@ public class CellArg {
 
     /**
      * 级联下拉
-     * @param cascadeColIndex 根据哪一列进行级联
+     * @param cascadeColIndex 根据哪一列进行级联，index从1开始
      * @param comboboxSubOptionMap 级联下拉可选子项
-     * @param cascadeNameNameSuffix 级联下拉字典名称后缀
      * @return this
      */
-    public CellArg comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap,String cascadeNameNameSuffix) {
-        this.cascadeColIndex = cascadeColIndex;
-        this.comboboxSubOptionMap = comboboxSubOptionMap;
-        this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
-        this.cascadeNameNameSuffix = cascadeNameNameSuffix;
-        return this;
-    }
-
     public CellArg comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap) {
         this.cascadeColIndex = cascadeColIndex;
         this.comboboxSubOptionMap = comboboxSubOptionMap;
         this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
-        this.cascadeNameNameSuffix = "";
         return this;
     }
 
