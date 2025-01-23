@@ -37,9 +37,14 @@ public class XlsxFileWriter {
         } catch (IOException e) {
             log.error("文件写入失败: {}", e.getMessage());
         } finally {
-            if (wb instanceof SXSSFWorkbook) {
-                SXSSFWorkbook workbook = (SXSSFWorkbook) wb;
-                workbook.dispose();
+            try {
+                if (wb instanceof SXSSFWorkbook) {
+                    SXSSFWorkbook workbook = (SXSSFWorkbook) wb;
+                    workbook.dispose();
+                }
+                wb.close();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
             }
         }
     }
