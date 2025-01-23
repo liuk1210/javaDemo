@@ -1,7 +1,7 @@
-package com.demo.poi.xlsx.util;
+package com.demo.poi.xlsx;
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

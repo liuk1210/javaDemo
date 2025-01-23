@@ -1,4 +1,4 @@
-package com.demo.poi.xlsx.util;
+package com.demo.poi.xlsx;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;

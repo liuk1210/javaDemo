@@ -2,8 +2,8 @@ package com.demo.poi.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.service.ExportExcelService;
-import com.demo.poi.xlsx.arg.XlsxSheet;
-import com.demo.poi.xlsx.util.XlsxReader;
+import com.demo.poi.xlsx.XlsxReader;
+import com.demo.poi.xlsx.XlsxSheet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
