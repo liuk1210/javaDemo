@@ -17,17 +17,21 @@ public class XlsxTitleMerger {
      * @param headers  表头数据
      */
     public static void mergeHorizontalAndVerticalCells(Sheet sheet, List<List<CellArg>> headers) {
-        int rowCount = headers.size();
-        int colCount = headers.get(0).size();
+        try{
+            int rowCount = headers.size();
+            int colCount = headers.get(0).size();
 
-        // 横向合并
-        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-            mergeDuplicateCellsInRow(sheet, rowIndex);
-        }
+            // 横向合并
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                mergeDuplicateCellsInRow(sheet, rowIndex);
+            }
 
-        // 纵向合并
-        for (int colIndex = 0; colIndex < colCount; colIndex++) {
-            mergeDuplicateCellsInColumn(sheet, colIndex, rowCount);
+            // 纵向合并
+            for (int colIndex = 0; colIndex < colCount; colIndex++) {
+                mergeDuplicateCellsInColumn(sheet, colIndex, rowCount);
+            }
+        }catch (Exception e){
+            throw new RuntimeException("创建表头行失败，无法正确合并单元格，请检查表头是否正确", e);
         }
     }
 
