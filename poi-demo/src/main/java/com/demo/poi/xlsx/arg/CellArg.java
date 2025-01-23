@@ -76,8 +76,25 @@ public class CellArg {
         return cell;
     }
 
-    public static CellArg ofTitle(String value) {
+    public static CellArg of(String key, String value) {
         CellArg cell = of(value);
+        cell.key = key;
+        return cell;
+    }
+
+    /**
+     * 创建标题行
+     * @param value excel单元格内容
+     * @return CellArg
+     */
+    public static CellArg ofT(String value) {
+        CellArg cell = of(value);
+        return cell.title();
+    }
+
+    public static CellArg ofT(String key, String value) {
+        CellArg cell = of(value);
+        cell.key = key;
         return cell.title();
     }
 

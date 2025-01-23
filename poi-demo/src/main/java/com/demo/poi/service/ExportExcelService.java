@@ -39,20 +39,20 @@ public class ExportExcelService {
         SheetArg sheet = new SheetArg(sheetName);
 
         List<CellArg> title1 = List.of(
-                CellArg.ofTitle("序号").annotations("这是注解"),
-                CellArg.ofTitle("分类"),
-                CellArg.ofTitle("分类"),
-                CellArg.ofTitle("分类"),
-                CellArg.ofTitle("其他"),
-                CellArg.ofTitle("其他")
+                CellArg.ofT("序号").annotations("这是注解"),
+                CellArg.ofT("分类"),
+                CellArg.ofT("分类"),
+                CellArg.ofT("分类"),
+                CellArg.ofT("其他"),
+                CellArg.ofT("其他")
         );
         List<CellArg> title2 = List.of(
-                CellArg.ofTitle("序号"),
-                CellArg.ofTitle("分类1"),
-                CellArg.ofTitle("分类2"),
-                CellArg.ofTitle("分类2"),
-                CellArg.ofTitle("其他1"),
-                CellArg.ofTitle("其他2")
+                CellArg.ofT("序号"),
+                CellArg.ofT("分类1"),
+                CellArg.ofT("分类2"),
+                CellArg.ofT("分类2"),
+                CellArg.ofT("其他1"),
+                CellArg.ofT("其他2")
         );
         //只需要在最后一行标题行设置key，用于自动识别json数据key初始化数据区域用
         Map<String, String[]> map = new HashMap<>();
@@ -60,13 +60,13 @@ public class ExportExcelService {
         map.put("b", new String[]{"b1", "b2", "b3"});
         map.put("c", new String[]{"c1", "c2", "c3"});
         List<CellArg> title3 = List.of(
-                CellArg.ofTitle("序号").key("xh"),
-                CellArg.ofTitle("分类1").key("fl1").combobox(new String[]{"a", "b", "c"}),
-                CellArg.ofTitle("分类2-1").key("fl2-1"),
-                CellArg.ofTitle("分类2-2").key("fl2-2"),
+                CellArg.ofT("xh", "序号"),
+                CellArg.ofT("fl1", "分类1").combobox(new String[]{"a", "b", "c"}),
+                CellArg.ofT("fl2-1", "分类2-1"),
+                CellArg.ofT("fl2-2", "分类2-2"),
                 //级联第2列的值，例如第二列选了b，这列就只能从b的选项里面选
-                CellArg.ofTitle("其他1").key("qt1").comboboxIndirect(2, map),
-                CellArg.ofTitle("其他2").key("qt2")
+                CellArg.ofT("qt1", "其他1").comboboxIndirect(2, map),
+                CellArg.ofT("qt2", "其他2")
         );
         sheet.addTitleRow(title1).addTitleRow(title2).addTitleRow(title3);
 
@@ -81,7 +81,7 @@ public class ExportExcelService {
                         CellArg.of("a"),
                         CellArg.of("123"),
                         CellArg.of("123"),
-                        CellArg.of("").key("qt1").comboboxIndirect(2, map2)
+                        CellArg.of("qt1", "").comboboxIndirect(2, map2)
                 ));
 
         Map<String, String[]> map3 = new HashMap<>();
@@ -94,7 +94,7 @@ public class ExportExcelService {
                         CellArg.of("b"),
                         CellArg.of("3"),
                         CellArg.of("3"),
-                        CellArg.of("").key("qt1").comboboxIndirect(2, map3)
+                        CellArg.of("qt1", "").comboboxIndirect(2, map3)
                 ));
 
         JSONObject dataArg3 = new JSONObject();
