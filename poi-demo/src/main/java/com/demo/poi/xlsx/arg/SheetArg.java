@@ -20,7 +20,8 @@ public class SheetArg {
     //待合并的单元格
     private List<CellRangeAddress> mergedCellRangeAddress;
 
-    public SheetArg() {
+    public SheetArg(String name) {
+        this.name = name;
         this.template = new ArrayList<>();
         this.title = new ArrayList<>();
         this.data = new ArrayList<>();
@@ -52,27 +53,23 @@ public class SheetArg {
     /**
      * 添加一行数据
      * @param dataObj 实体类对象
-     * @return sheetArg
      */
-    public SheetArg addDataRow(JSONObject dataObj){
+    public void addDataRow(JSONObject dataObj){
         List<CellArg> dataList = new ArrayList<>();
         for(CellArg title:this.title.get(this.title.size() - 1)){
-            dataList.add(CellArg.getInstance()
-                    .key(title.getKey())
-                    .value(dataObj.getString(title.getKey())));
+            dataList.add(
+                    CellArg.of(dataObj.getString(title.getKey())).key(title.getKey())
+            );
         }
         this.data.add(dataList);
-        return this;
     }
 
     /**
      * 添加一行数据
      * @param cells 数据行
-     * @return sheetArg sheet参数
      */
-    public SheetArg addDataRow(List<CellArg> cells){
+    public void addDataRow(List<CellArg> cells){
         this.data.add(cells);
-        return this;
     }
 
     /**

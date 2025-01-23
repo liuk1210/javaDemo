@@ -66,17 +66,19 @@ public class CellArg {
      */
     private boolean wrapText;
 
-    private CellArg(){
-
+    public static CellArg of(String value) {
+        CellArg cell = new CellArg();
+        cell.columnWidth = 3000;
+        cell.type = XlsxExporter.TYPE_STRING;
+        cell.style = XlsxCellStyle.STYLE_NORMAL;
+        cell.wrapText = false;
+        cell.value = value;
+        return cell;
     }
 
-    public static CellArg getInstance() {
-        CellArg instance = new CellArg();
-        instance.columnWidth = 3000;
-        instance.type = XlsxExporter.TYPE_STRING;
-        instance.style = XlsxCellStyle.STYLE_NORMAL;
-        instance.wrapText = false;
-        return instance;
+    public static CellArg ofTitle(String value) {
+        CellArg cell = of(value);
+        return cell.title();
     }
 
     public CellArg readonly() {
