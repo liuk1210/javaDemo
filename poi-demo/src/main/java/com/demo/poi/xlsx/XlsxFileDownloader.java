@@ -13,15 +13,16 @@ import java.nio.charset.StandardCharsets;
 public class XlsxFileDownloader {
 
     //下载文件
-    public static void download(String fileName, HttpServletResponse response, Workbook wb) {
+    public static void download(Workbook wb, String fileName, HttpServletResponse response) {
         try {
             response.setCharacterEncoding("UTF-8");
             response.setHeader("content-Type", "application/vnd.ms-excel");
             response.setHeader("Content-Disposition",
                     "attachment;filename=" + URLEncoder.encode(fileName, String.valueOf(StandardCharsets.UTF_8)));
             wb.write(response.getOutputStream());
-            if (wb instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
+            if (wb instanceof SXSSFWorkbook) {
+                SXSSFWorkbook workbook = (SXSSFWorkbook) wb;
+                workbook.dispose();
             }
             wb.close();
         } catch (IOException e) {

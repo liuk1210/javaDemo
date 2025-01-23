@@ -2,6 +2,7 @@ package com.demo.poi.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.dao.ExportExcelDao;
+import com.demo.poi.xlsx.XlsxBigDataExporter;
 import com.demo.poi.xlsx.XlsxCell;
 import com.demo.poi.xlsx.XlsxExporter;
 import com.demo.poi.xlsx.XlsxSheet;
@@ -25,7 +26,7 @@ public class ExportExcelService {
         List<JSONObject> list = exportExcelDao.list(sql);
         long end = System.currentTimeMillis();
         log.info("数据库查询耗时：{}ms", end - start);
-        XlsxExporter.exportBigData("导出数据.xlsx", list, response);
+        XlsxBigDataExporter.exportBigData("导出数据.xlsx", list, response);
         long now = System.currentTimeMillis();
         log.info("导出excel耗时{}ms", now - end);
     }

@@ -1,5 +1,6 @@
 package com.demo.poi.xlsx;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -7,6 +8,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.List;
 
+@Slf4j
 public class XlsxTitleMerger {
 
     /**

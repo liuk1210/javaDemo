@@ -1,7 +1,8 @@
 package com.demo.poi.xlsx;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,14 +11,14 @@ import java.io.IOException;
 public class XlsxFileWriter {
 
     /**
-     * 将 XSSFWorkbook 写入指定路径的文件
+     * 将 Workbook 写入指定路径的文件
      *
-     * @param workbook 要写入的 XSSFWorkbook 对象
+     * @param wb 要写入的 Workbook 对象
      * @param filePath 目标文件路径（如：/path/to/file.xlsx）
      */
-    public static void writeWorkbookToFile(XSSFWorkbook workbook, String filePath){
+    public static void writeWorkbookToFile(Workbook wb, String filePath) {
         // 检查参数是否为空
-        if (workbook == null) {
+        if (wb == null) {
             throw new IllegalArgumentException("Workbook不能为空");
         }
         if (filePath == null || filePath.trim().isEmpty()) {
@@ -31,10 +32,15 @@ public class XlsxFileWriter {
 
         // 使用 try-with-resources 确保流关闭
         try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
-            workbook.write(outputStream);
+            wb.write(outputStream);
             log.info("文件已成功写入: {}", filePath);
         } catch (IOException e) {
             log.error("文件写入失败: {}", e.getMessage());
+        } finally {
+            if (wb instanceof SXSSFWorkbook) {
+                SXSSFWorkbook workbook = (SXSSFWorkbook) wb;
+                workbook.dispose();
+            }
         }
     }
 

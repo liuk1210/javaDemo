@@ -1,16 +1,13 @@
 package com.demo.poi.xlsx;
 
-import com.alibaba.fastjson2.JSONObject;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -29,57 +26,18 @@ public class XlsxExporter {
      * @param response 响应
      */
     public static void export(String fileName, XlsxSheet arg, HttpServletResponse response) {
-        XlsxFileDownloader.download(fileName, response, exportExcel(arg));
+        XlsxFileDownloader.download(exportExcel(arg), fileName, response);
     }
 
     /**
      * 单sheet导出，用于本地调试生成文件到本地
+     *
      * @param filePath 本地保存xlsx文件的路径
-     * @param arg 参数
+     * @param arg      参数
      */
     public static void export(String filePath, XlsxSheet arg) {
         XSSFWorkbook wb = exportExcel(arg);
-        XlsxFileWriter.writeWorkbookToFile(wb,filePath);
-    }
-
-    /**
-     * 大数据量导出
-     *
-     * @param fileName 文件名称
-     * @param dataList 数据
-     * @param response 响应
-     */
-    public static void exportBigData(String fileName, List<JSONObject> dataList, HttpServletResponse response) {
-        XlsxFileDownloader.download(fileName, response, exportBigExcel(dataList));
-    }
-
-    private static SXSSFWorkbook exportBigExcel(List<JSONObject> dataList) {
-        SXSSFWorkbook workbook = new SXSSFWorkbook(100);
-        Sheet sheet = workbook.createSheet("Sheet1");
-        if (CollectionUtils.isEmpty(dataList)) {
-            return workbook;
-        }
-        int rowIndex = 0;
-        //初始化标题行
-        JSONObject data = dataList.get(rowIndex);
-        Row titleRow = sheet.createRow(rowIndex);
-        List<String> title = new ArrayList<>();
-        int index = 0;
-        for (String key : data.keySet()) {
-            titleRow.createCell(index).setCellValue(key);
-            title.add(key);
-            index++;
-        }
-        //初始化数据行
-        for (JSONObject obj : dataList) {
-            rowIndex++;
-            Row row = sheet.createRow(rowIndex);
-            for (int i = 0; i < title.size(); i++) {
-                Cell cell = row.createCell(i);
-                cell.setCellValue(obj.getString(title.get(i)));
-            }
-        }
-        return workbook;
+        XlsxFileWriter.writeWorkbookToFile(wb, filePath);
     }
 
     //单个sheet导出
@@ -134,6 +92,22 @@ public class XlsxExporter {
         //4.合并单元格
         if (CollectionUtils.isNotEmpty(arg.getMergedCellRangeAddress())) {
             arg.getMergedCellRangeAddress().forEach(sheet::addMergedRegion);
+        }
+    }
+
+    //校验表格sheet名称
+    private static final Pattern SHEET_NAME_PATTERN = Pattern.compile(":\\\\/\\?\\*\\[]",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.DOTALL | Pattern.MULTILINE);
+
+    private static void validSheetName(String sheetName) {
+        if (StringUtils.isEmpty(sheetName)) {
+            throw new RuntimeException("导出文档中的sheet名称不能为空！");
+        }
+        if (sheetName.length() > 31) {
+            throw new RuntimeException("导出文档中的sheet名称不能多于31个字符！");
+        }
+        if (SHEET_NAME_PATTERN.matcher(sheetName).find()) {
+            throw new RuntimeException("导出文档中的sheet名称不能包含下列任一字符: :\\/?*[或]！");
         }
     }
 
@@ -228,7 +202,7 @@ public class XlsxExporter {
      * 3为级联下拉
      *
      * @param sheet          当前sheet
-     * @param xlsxCell        当前单元格参数
+     * @param xlsxCell       当前单元格参数
      * @param optionStartRow 起始行
      * @param optionEndRow   结束行
      * @param columnIndex    当前列index
@@ -248,7 +222,7 @@ public class XlsxExporter {
                 }
                 break;
             case COMBOBOX_INDIRECT:
-                if(xlsxCell.getComboboxSubOptionMap() == null || xlsxCell.getComboboxSubOptionMap().isEmpty()) {
+                if (xlsxCell.getComboboxSubOptionMap() == null || xlsxCell.getComboboxSubOptionMap().isEmpty()) {
                     break;
                 }
                 //3为级联下拉
@@ -374,22 +348,6 @@ public class XlsxExporter {
             num /= 26;
         }
         return columnName.toString();
-    }
-
-    //校验表格sheet名称
-    private static final Pattern SHEET_NAME_PATTERN = Pattern.compile(":\\\\/\\?\\*\\[]",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.DOTALL | Pattern.MULTILINE);
-
-    private static void validSheetName(String sheetName) {
-        if (StringUtils.isEmpty(sheetName)) {
-            throw new RuntimeException("导出文档中的sheet名称不能为空！");
-        }
-        if (sheetName.length() > 31) {
-            throw new RuntimeException("导出文档中的sheet名称不能多于31个字符！");
-        }
-        if (SHEET_NAME_PATTERN.matcher(sheetName).find()) {
-            throw new RuntimeException("导出文档中的sheet名称不能包含下列任一字符: :\\/?*[或]！");
-        }
     }
 
 }
