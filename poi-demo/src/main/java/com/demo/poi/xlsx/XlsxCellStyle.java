@@ -4,30 +4,20 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class XlsxCellStyle {
 
-    /**
-     * 单元格样式
-     */
-    public static final String STYLE_NORMAL = "normal",
-            STYLE_TITLE = "title",
-            STYLE_READONLY = "readOnly",
-            STYLE_ERROR = "error",
-            STYLE_RED_FONT = "redFont",
-            STYLE_LEFT_TOP = "leftTop";
-
     //初始化样式map
-    public static Map<String, XSSFCellStyle> initCellStyle(XSSFWorkbook workbook) {
-        Map<String, XSSFCellStyle> map = new HashMap<>();
-        map.put(STYLE_TITLE, initTitleStyle(workbook));
-        map.put(STYLE_NORMAL, initNormalStyle(workbook));
-        map.put(STYLE_READONLY, initReadOnlyDataStyle(workbook));
-        map.put(STYLE_ERROR, initErrorDataStyle(workbook));
-        map.put(STYLE_RED_FONT, initRedFontStyle(workbook));
-        map.put(STYLE_LEFT_TOP, initLeftTopStyle(workbook));
+    public static Map<XlsxCellStyleType, XSSFCellStyle> initCellStyle(XSSFWorkbook workbook) {
+        Map<XlsxCellStyleType, XSSFCellStyle> map = new EnumMap<>(XlsxCellStyleType.class);
+        map.put(XlsxCellStyleType.TITLE, initTitleStyle(workbook));
+        map.put(XlsxCellStyleType.NORMAL, initNormalStyle(workbook));
+        map.put(XlsxCellStyleType.READONLY, initReadOnlyDataStyle(workbook));
+        map.put(XlsxCellStyleType.ERROR, initErrorDataStyle(workbook));
+        map.put(XlsxCellStyleType.RED_FONT, initRedFontStyle(workbook));
+        map.put(XlsxCellStyleType.LEFT_TOP, initLeftTopStyle(workbook));
         return map;
     }
 
@@ -52,7 +42,6 @@ public class XlsxCellStyle {
         Font font = workbook.createFont();
         font.setColor(IndexedColors.RED.getIndex());
         style.setFont(font);
-
         return style;
     }
 

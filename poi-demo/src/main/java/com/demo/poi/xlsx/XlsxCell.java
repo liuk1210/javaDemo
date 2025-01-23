@@ -35,7 +35,7 @@ public class XlsxCell {
     /**
      * 单元格样式
      */
-    private String style;
+    private XlsxCellStyleType style;
 
     /**
      * 单元格所在列-表头字段类型，用于导出时设置单元格数据类型
@@ -69,7 +69,7 @@ public class XlsxCell {
         XlsxCell cell = new XlsxCell();
         cell.columnWidth = 3000;
         cell.type = XlsxCellType.STRING;
-        cell.style = XlsxCellStyle.STYLE_NORMAL;
+        cell.style = XlsxCellStyleType.NORMAL;
         cell.wrapText = false;
         cell.value = value;
         return cell;
@@ -98,12 +98,12 @@ public class XlsxCell {
     }
 
     public XlsxCell readonly() {
-        this.style = XlsxCellStyle.STYLE_READONLY;
+        this.style = XlsxCellStyleType.READONLY;
         return this;
     }
 
     public XlsxCell error() {
-        this.style = XlsxCellStyle.STYLE_ERROR;
+        this.style = XlsxCellStyleType.ERROR;
         return this;
     }
 
@@ -122,7 +122,7 @@ public class XlsxCell {
     }
 
     public XlsxCell title() {
-        this.style = XlsxCellStyle.STYLE_TITLE;
+        this.style = XlsxCellStyleType.TITLE;
         return this;
     }
 
@@ -171,12 +171,12 @@ public class XlsxCell {
     }
 
     public XlsxCell redFont() {
-        this.style = XlsxCellStyle.STYLE_RED_FONT;
+        this.style = XlsxCellStyleType.RED_FONT;
         return this;
     }
 
     public XlsxCell leftTop() {
-        this.style = XlsxCellStyle.STYLE_LEFT_TOP;
+        this.style = XlsxCellStyleType.LEFT_TOP;
         return this;
     }
 

@@ -104,7 +104,7 @@ public class XlsxExporter {
         //数据开始行，即模板+表头的总行数
         int dataStartRow = titleStartRow + title.size();
         //初始化样式
-        Map<String, XSSFCellStyle> styleMap = XlsxCellStyle.initCellStyle(workbook);
+        Map<XlsxCellStyleType, XSSFCellStyle> styleMap = XlsxCellStyle.initCellStyle(workbook);
 
         //1.初始化模板行
         for (int i = 0; i < template.size(); i++) {
@@ -145,7 +145,8 @@ public class XlsxExporter {
      * @param initValidationDataOptions 是否初始化枚举值下拉框
      * @param styleMap                  样式map
      */
-    private static void initRow(XSSFRow row, List<XlsxCell> cells, boolean initValidationDataOptions, Map<String, XSSFCellStyle> styleMap) {
+    private static void initRow(XSSFRow row, List<XlsxCell> cells, boolean initValidationDataOptions,
+                                Map<XlsxCellStyleType, XSSFCellStyle> styleMap) {
         if (CollectionUtils.isNotEmpty(cells)) {
             for (int j = 0; j < cells.size(); j++) {
                 XlsxCell xlsxCell = cells.get(j);
@@ -161,13 +162,14 @@ public class XlsxExporter {
                     addAnnotationsComment(row, cell, xlsxCell.getAnnotations());
                 }
 
-                //设置单元格样式，需要换行处理的单独复制一份样式
+                XSSFCellStyle style = styleMap.get(xlsxCell.getStyle());
                 if (xlsxCell.isWrapText()) {
-                    CellStyle cellStyle = styleMap.get(xlsxCell.getStyle()).copy();
+                    //设置单元格样式，需要换行处理的单独复制一份样式
+                    CellStyle cellStyle = style.copy();
                     cellStyle.setWrapText(true);
                     cell.setCellStyle(cellStyle);
                 } else {
-                    cell.setCellStyle(styleMap.get(xlsxCell.getStyle()));
+                    cell.setCellStyle(style);
                 }
 
                 //设置单元格宽度，仅在第一行行设置
