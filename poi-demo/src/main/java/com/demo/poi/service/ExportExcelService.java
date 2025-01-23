@@ -32,7 +32,7 @@ public class ExportExcelService {
     }
 
     public void exportDemo(HttpServletResponse response) {
-        XlsxSheet arg = getSheetArg("sheet1");
+        XlsxSheet arg = getSheetArg("表1");
         XlsxExporter.export("demo.xlsx", arg, response);
     }
 
@@ -108,7 +108,7 @@ public class ExportExcelService {
 
     public static void main(String[] args) {
         //导出到本地文件
-        XlsxSheet arg = getSheetArg("sheet1");
+        XlsxSheet arg = getSheetArg("表1");
         XlsxExporter.export("demo.xlsx", arg);
     }
 

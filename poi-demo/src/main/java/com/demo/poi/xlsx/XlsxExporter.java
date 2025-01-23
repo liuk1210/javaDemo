@@ -8,12 +8,13 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * excel导出工具类
+ * excel导出工具类，支持单个/多个sheet导出
  */
 @Slf4j
 public class XlsxExporter {
@@ -22,28 +23,55 @@ public class XlsxExporter {
      * 单sheet导出，用于web服务下载导出的文件
      *
      * @param fileName 文件名称
-     * @param arg      参数
-     * @param response 响应
+     * @param sheet    参数
+     * @param response http响应
      */
-    public static void export(String fileName, XlsxSheet arg, HttpServletResponse response) {
-        XlsxFileDownloader.download(exportExcel(arg), fileName, response);
+    public static void export(String fileName, XlsxSheet sheet, HttpServletResponse response) {
+        export(fileName, Collections.singletonList(sheet), response);
     }
 
     /**
      * 单sheet导出，用于本地调试生成文件到本地
      *
      * @param filePath 本地保存xlsx文件的路径
-     * @param arg      参数
+     * @param sheet    参数
      */
-    public static void export(String filePath, XlsxSheet arg) {
-        XSSFWorkbook wb = exportExcel(arg);
-        XlsxFileWriter.writeWorkbookToFile(wb, filePath);
+    public static void export(String filePath, XlsxSheet sheet) {
+        export(filePath, Collections.singletonList(sheet));
     }
 
-    //单个sheet导出
-    private static XSSFWorkbook exportExcel(XlsxSheet arg) {
+    /**
+     * 多sheet导出
+     *
+     * @param fileName 文件名
+     * @param sheets   多个sheet参数配置
+     * @param response http响应
+     */
+    public static void export(String fileName, List<XlsxSheet> sheets, HttpServletResponse response) {
+        XSSFWorkbook workbook = initWorkbook(sheets);
+        XlsxFileDownloader.download(workbook, fileName, response);
+    }
+
+    /**
+     * 多sheet导出到本地文件
+     *
+     * @param filePath 文件路径
+     * @param sheets   多个sheet参数配置
+     */
+    public static void export(String filePath, List<XlsxSheet> sheets) {
+        XSSFWorkbook workbook = initWorkbook(sheets);
+        XlsxFileWriter.writeWorkbookToFile(workbook, filePath);
+    }
+
+    //初始化XSSFWorkbook，支持多个sheet
+    private static XSSFWorkbook initWorkbook(List<XlsxSheet> sheets) {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        initSheet(workbook, arg);
+        if (sheets == null) {
+            return workbook;
+        }
+        for (XlsxSheet sheet : sheets) {
+            initSheet(workbook, sheet);
+        }
         return workbook;
     }
 
@@ -103,6 +131,9 @@ public class XlsxExporter {
         if (StringUtils.isEmpty(sheetName)) {
             throw new RuntimeException("导出文档中的sheet名称不能为空！");
         }
+        if (sheetName.toUpperCase().startsWith("SHEET")) {
+            throw new RuntimeException("sheet名称请勿使用默认名称sheet作为前缀，不区分大小写！");
+        }
         if (sheetName.length() > 31) {
             throw new RuntimeException("导出文档中的sheet名称不能多于31个字符！");
         }
@@ -139,7 +170,7 @@ public class XlsxExporter {
                 XSSFCellStyle style = styleMap.get(xlsxCell.getStyle());
                 if (xlsxCell.isWrapText()) {
                     //设置单元格样式，需要换行处理的单独复制一份样式
-                    CellStyle cellStyle = style.copy();
+                    XSSFCellStyle cellStyle = style.copy();
                     cellStyle.setWrapText(true);
                     cell.setCellStyle(cellStyle);
                 } else {

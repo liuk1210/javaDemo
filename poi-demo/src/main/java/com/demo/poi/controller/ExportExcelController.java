@@ -42,7 +42,7 @@ public class ExportExcelController {
     @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json，同时校验表头")
     public List<JSONObject> readXlsxAndCheckTitleDemo(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("titleStartRow") int titleStartRow) {
-        XlsxSheet arg = ExportExcelService.getSheetArg("sheet1");
+        XlsxSheet arg = ExportExcelService.getSheetArg("表1");
         return XlsxReader.read(file, titleStartRow, arg.getTitle());
     }
 
