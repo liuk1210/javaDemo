@@ -39,8 +39,9 @@ public class XlsxCell {
 
     /**
      * 单元格所在列-表头字段类型，用于导出时设置单元格数据类型
+     * 普通字符串、下拉框、级联下拉框
      */
-    private String type;
+    private XlsxCellType type;
 
     /**
      * 级联下拉框参数
@@ -67,7 +68,7 @@ public class XlsxCell {
     public static XlsxCell of(String value) {
         XlsxCell cell = new XlsxCell();
         cell.columnWidth = 3000;
-        cell.type = XlsxExporter.TYPE_STRING;
+        cell.type = XlsxCellType.STRING;
         cell.style = XlsxCellStyle.STYLE_NORMAL;
         cell.wrapText = false;
         cell.value = value;
@@ -151,7 +152,7 @@ public class XlsxCell {
     }
 
     public XlsxCell combobox(String[] comboboxOptions) {
-        this.type = XlsxExporter.TYPE_COMBOBOX;
+        this.type = XlsxCellType.COMBOBOX;
         this.comboboxOptions = comboboxOptions;
         return this;
     }
@@ -165,7 +166,7 @@ public class XlsxCell {
     public XlsxCell comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap) {
         this.cascadeColIndex = cascadeColIndex;
         this.comboboxSubOptionMap = comboboxSubOptionMap;
-        this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
+        this.type = XlsxCellType.COMBOBOX_INDIRECT;
         return this;
     }
 

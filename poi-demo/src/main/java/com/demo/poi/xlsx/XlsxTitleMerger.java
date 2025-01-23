@@ -51,10 +51,7 @@ public class XlsxTitleMerger {
             Cell cell = row.getCell(colIndex);
             String currentValue = cell != null ? cell.getStringCellValue() : "";
 
-            if (currentValue.equals(prevValue)) {
-                // 如果当前单元格的值与前一个单元格的值相同，继续
-                continue;
-            } else {
+            if (!currentValue.equals(prevValue)) {
                 // 如果值不同，检查是否需要合并
                 if (colIndex - startCol > 1) {
                     // 合并单元格
@@ -88,10 +85,7 @@ public class XlsxTitleMerger {
             Cell cell = row != null ? row.getCell(colIndex) : null;
             String currentValue = cell != null ? cell.getStringCellValue() : "";
 
-            if (currentValue.equals(prevValue)) {
-                // 如果当前单元格的值与前一个单元格的值相同，继续
-                continue;
-            } else {
+            if (!currentValue.equals(prevValue)) {
                 // 如果值不同，检查是否需要合并
                 if (rowIndex - startRow > 1) {
                     // 合并单元格

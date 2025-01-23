@@ -22,11 +22,6 @@ import java.util.regex.Pattern;
 public class XlsxExporter {
 
     /**
-     * 单元格数据展示类型
-     */
-    public static final String TYPE_STRING = "string", TYPE_COMBOBOX = "combobox", TYPE_COMBOBOX_INDIRECT = "comboboxIndirect";
-
-    /**
      * 单sheet导出，用于web服务下载导出的文件
      *
      * @param fileName 文件名称
@@ -188,9 +183,9 @@ public class XlsxExporter {
                 //填充单元格数据，目前仅支持以下类型
                 switch (xlsxCell.getType()) {
                     //字符串类型单元格
-                    case TYPE_COMBOBOX_INDIRECT:
-                    case TYPE_COMBOBOX:
-                    case TYPE_STRING:
+                    case COMBOBOX_INDIRECT:
+                    case COMBOBOX:
+                    case STRING:
                         cell.setCellValue(xlsxCell.getValue());
                         cell.setCellType(CellType.STRING);
                         break;
@@ -238,7 +233,7 @@ public class XlsxExporter {
      */
     private static void addValidationDataOptions(XSSFSheet sheet, XlsxCell xlsxCell, int optionStartRow, int optionEndRow, int columnIndex) {
         switch (xlsxCell.getType()) {
-            case TYPE_COMBOBOX:
+            case COMBOBOX:
                 if (xlsxCell.getComboboxOptions() == null || xlsxCell.getComboboxOptions().length == 0) {
                     break;
                 }
@@ -250,7 +245,7 @@ public class XlsxExporter {
                     addSheetValidationDataOptions(sheet, xlsxCell, optionStartRow, optionEndRow, columnIndex);
                 }
                 break;
-            case TYPE_COMBOBOX_INDIRECT:
+            case COMBOBOX_INDIRECT:
                 if(xlsxCell.getComboboxSubOptionMap() == null || xlsxCell.getComboboxSubOptionMap().isEmpty()) {
                     break;
                 }
@@ -369,7 +364,7 @@ public class XlsxExporter {
     }
 
     //列索引转换成excel的列
-    public static String convertToColumnName(int num) {
+    private static String convertToColumnName(int num) {
         StringBuilder columnName = new StringBuilder();
         while (num > 0) {
             num--;
