@@ -9,18 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class SheetArg {
+public class XlsxSheet {
     private String name;
     //模板行
-    private List<List<CellArg>> template;
+    private List<List<XlsxCell>> template;
     //支持多行表头
-    private List<List<CellArg>> title;
+    private List<List<XlsxCell>> title;
     //数据行
-    private List<List<CellArg>> data;
+    private List<List<XlsxCell>> data;
     //待合并的单元格
     private List<CellRangeAddress> mergedCellRangeAddress;
 
-    public SheetArg(String name) {
+    public XlsxSheet(String name) {
         this.name = name;
         this.template = new ArrayList<>();
         this.title = new ArrayList<>();
@@ -28,22 +28,22 @@ public class SheetArg {
         this.mergedCellRangeAddress = new ArrayList<>();
     }
 
-    public SheetArg addMergedCellRangeAddress(CellRangeAddress cellAddresses){
+    public XlsxSheet addMergedCellRangeAddress(CellRangeAddress cellAddresses){
         this.mergedCellRangeAddress.add(cellAddresses);
         return this;
     }
 
     //添加一行模板行
-    public SheetArg addTemplateRow(List<CellArg> cells) {
+    public XlsxSheet addTemplateRow(List<XlsxCell> cells) {
         this.template.add(cells);
         return this;
     }
 
     //添加一行表头
-    public SheetArg addTitleRow(List<CellArg> cells) {
-        for(CellArg cellArg:cells){
-            if(cellArg!=null){
-                cellArg.title();
+    public XlsxSheet addTitleRow(List<XlsxCell> cells) {
+        for(XlsxCell xlsxCell :cells){
+            if(xlsxCell !=null){
+                xlsxCell.title();
             }
         }
         this.title.add(cells);
@@ -55,10 +55,10 @@ public class SheetArg {
      * @param dataObj 实体类对象
      */
     public void addDataRow(JSONObject dataObj){
-        List<CellArg> dataList = new ArrayList<>();
-        for(CellArg title:this.title.get(this.title.size() - 1)){
+        List<XlsxCell> dataList = new ArrayList<>();
+        for(XlsxCell title:this.title.get(this.title.size() - 1)){
             dataList.add(
-                    CellArg.of(dataObj.getString(title.getKey())).key(title.getKey())
+                    XlsxCell.of(dataObj.getString(title.getKey())).key(title.getKey())
             );
         }
         this.data.add(dataList);
@@ -68,7 +68,7 @@ public class SheetArg {
      * 添加一行数据
      * @param cells 数据行
      */
-    public void addDataRow(List<CellArg> cells){
+    public void addDataRow(List<XlsxCell> cells){
         this.data.add(cells);
     }
 
@@ -77,13 +77,13 @@ public class SheetArg {
      * @param key 表头字段key
      * @return 表头单元格
      */
-    public CellArg getLastTitleRowCellArgByKey(String key) {
+    public XlsxCell getLastTitleRowCellArgByKey(String key) {
         if (this.title.isEmpty() || StringUtils.isBlank(key)) {
             return null;
         } else {
-            for (CellArg cellArg : this.title.get(this.title.size() - 1)) {
-                if (cellArg != null && key.equals(cellArg.getKey())) {
-                    return cellArg;
+            for (XlsxCell xlsxCell : this.title.get(this.title.size() - 1)) {
+                if (xlsxCell != null && key.equals(xlsxCell.getKey())) {
+                    return xlsxCell;
                 }
             }
         }
@@ -95,13 +95,13 @@ public class SheetArg {
      * @param key 表头字段key
      * @return 表头单元格
      */
-    public CellArg getLastDataRowCellArgByKey(String key) {
+    public XlsxCell getLastDataRowCellArgByKey(String key) {
         if (this.data.isEmpty() || StringUtils.isBlank(key)) {
             return null;
         } else {
-            for (CellArg cellArg : this.data.get(this.data.size() - 1)) {
-                if (cellArg != null && key.equals(cellArg.getKey())) {
-                    return cellArg;
+            for (XlsxCell xlsxCell : this.data.get(this.data.size() - 1)) {
+                if (xlsxCell != null && key.equals(xlsxCell.getKey())) {
+                    return xlsxCell;
                 }
             }
         }

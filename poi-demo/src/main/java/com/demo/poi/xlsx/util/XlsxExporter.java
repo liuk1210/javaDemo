@@ -1,8 +1,8 @@
 package com.demo.poi.xlsx.util;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.demo.poi.xlsx.arg.CellArg;
-import com.demo.poi.xlsx.arg.SheetArg;
+import com.demo.poi.xlsx.arg.XlsxCell;
+import com.demo.poi.xlsx.arg.XlsxSheet;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,7 +35,7 @@ public class XlsxExporter {
      * @param arg      参数
      * @param response 响应
      */
-    public static void export(String fileName, SheetArg arg, HttpServletResponse response) {
+    public static void export(String fileName, XlsxSheet arg, HttpServletResponse response) {
         XlsxFileDownloader.download(fileName, response, exportExcel(arg));
     }
 
@@ -44,7 +44,7 @@ public class XlsxExporter {
      * @param filePath 本地保存xlsx文件的路径
      * @param arg 参数
      */
-    public static void export(String filePath, SheetArg arg) {
+    public static void export(String filePath, XlsxSheet arg) {
         XSSFWorkbook wb = exportExcel(arg);
         XlsxFileWriter.writeWorkbookToFile(wb,filePath);
     }
@@ -90,21 +90,21 @@ public class XlsxExporter {
     }
 
     //单个sheet导出
-    private static XSSFWorkbook exportExcel(SheetArg arg) {
+    private static XSSFWorkbook exportExcel(XlsxSheet arg) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         initSheet(workbook, arg);
         return workbook;
     }
 
     //初始化sheet
-    private static void initSheet(XSSFWorkbook workbook, SheetArg arg) {
+    private static void initSheet(XSSFWorkbook workbook, XlsxSheet arg) {
         //校验sheetName是否合法
         validSheetName(arg.getName());
 
         XSSFSheet sheet = workbook.createSheet(arg.getName());
-        List<List<CellArg>> template = arg.getTemplate();
-        List<List<CellArg>> title = arg.getTitle();
-        List<List<CellArg>> data = arg.getData();
+        List<List<XlsxCell>> template = arg.getTemplate();
+        List<List<XlsxCell>> title = arg.getTitle();
+        List<List<XlsxCell>> data = arg.getData();
 
         //表头开始行，即模板的行数
         int titleStartRow = template.size();
@@ -123,15 +123,15 @@ public class XlsxExporter {
         }
         //3.初始化表头，因为下拉框数据重复设置时第一次赋值的才有效
         for (int i = 0; i < title.size(); i++) {
-            List<CellArg> cellArgs = title.get(i);
+            List<XlsxCell> xlsxCells = title.get(i);
             XSSFRow row = sheet.createRow(i + titleStartRow);
-            initRow(row, cellArgs, false, styleMap);
+            initRow(row, xlsxCells, false, styleMap);
             //仅在最后一行表头初始化完毕后执行
             if (i == title.size() - 1) {
                 //默认初始化200行的下拉框，从数据开始行开始初始化
-                if (CollectionUtils.isNotEmpty(cellArgs)) {
-                    for (int j = 0; j < cellArgs.size(); j++) {
-                        addValidationDataOptions(sheet, cellArgs.get(j), dataStartRow, 200, j);
+                if (CollectionUtils.isNotEmpty(xlsxCells)) {
+                    for (int j = 0; j < xlsxCells.size(); j++) {
+                        addValidationDataOptions(sheet, xlsxCells.get(j), dataStartRow, 200, j);
                     }
                 }
             }
@@ -152,48 +152,48 @@ public class XlsxExporter {
      * @param initValidationDataOptions 是否初始化枚举值下拉框
      * @param styleMap                  样式map
      */
-    private static void initRow(XSSFRow row, List<CellArg> cells, boolean initValidationDataOptions, Map<String, XSSFCellStyle> styleMap) {
+    private static void initRow(XSSFRow row, List<XlsxCell> cells, boolean initValidationDataOptions, Map<String, XSSFCellStyle> styleMap) {
         if (CollectionUtils.isNotEmpty(cells)) {
             for (int j = 0; j < cells.size(); j++) {
-                CellArg cellArg = cells.get(j);
+                XlsxCell xlsxCell = cells.get(j);
                 XSSFCell cell = row.createCell(j);
 
                 //设置单元格专属枚举值
                 if (initValidationDataOptions) {
-                    addValidationDataOptions(row.getSheet(), cellArg, row.getRowNum(), row.getRowNum(), j);
+                    addValidationDataOptions(row.getSheet(), xlsxCell, row.getRowNum(), row.getRowNum(), j);
                 }
 
                 //设置批注信息
-                if (StringUtils.isNotBlank(cellArg.getAnnotations())) {
-                    addAnnotationsComment(row, cell, cellArg.getAnnotations());
+                if (StringUtils.isNotBlank(xlsxCell.getAnnotations())) {
+                    addAnnotationsComment(row, cell, xlsxCell.getAnnotations());
                 }
 
                 //设置单元格样式，需要换行处理的单独复制一份样式
-                if (cellArg.isWrapText()) {
-                    CellStyle cellStyle = styleMap.get(cellArg.getStyle()).copy();
+                if (xlsxCell.isWrapText()) {
+                    CellStyle cellStyle = styleMap.get(xlsxCell.getStyle()).copy();
                     cellStyle.setWrapText(true);
                     cell.setCellStyle(cellStyle);
                 } else {
-                    cell.setCellStyle(styleMap.get(cellArg.getStyle()));
+                    cell.setCellStyle(styleMap.get(xlsxCell.getStyle()));
                 }
 
                 //设置单元格宽度，仅在第一行行设置
                 if (row.getRowNum() == 0) {
-                    row.getSheet().setColumnWidth(j, cellArg.getColumnWidth());
+                    row.getSheet().setColumnWidth(j, xlsxCell.getColumnWidth());
                 }
 
                 //设置单元格高度
-                if (cellArg.getRowHeight() != 0) {
-                    row.setHeight(cellArg.getRowHeight());
+                if (xlsxCell.getRowHeight() != 0) {
+                    row.setHeight(xlsxCell.getRowHeight());
                 }
 
                 //填充单元格数据，目前仅支持以下类型
-                switch (cellArg.getType()) {
+                switch (xlsxCell.getType()) {
                     //字符串类型单元格
                     case TYPE_COMBOBOX_INDIRECT:
                     case TYPE_COMBOBOX:
                     case TYPE_STRING:
-                        cell.setCellValue(cellArg.getValue());
+                        cell.setCellValue(xlsxCell.getValue());
                         cell.setCellType(CellType.STRING);
                         break;
                     default:
@@ -233,31 +233,31 @@ public class XlsxExporter {
      * 3为级联下拉
      *
      * @param sheet          当前sheet
-     * @param cellArg        当前单元格参数
+     * @param xlsxCell        当前单元格参数
      * @param optionStartRow 起始行
      * @param optionEndRow   结束行
      * @param columnIndex    当前列index
      */
-    private static void addValidationDataOptions(XSSFSheet sheet, CellArg cellArg, int optionStartRow, int optionEndRow, int columnIndex) {
-        switch (cellArg.getType()) {
+    private static void addValidationDataOptions(XSSFSheet sheet, XlsxCell xlsxCell, int optionStartRow, int optionEndRow, int columnIndex) {
+        switch (xlsxCell.getType()) {
             case TYPE_COMBOBOX:
-                if (cellArg.getComboboxOptions() == null || cellArg.getComboboxOptions().length == 0) {
+                if (xlsxCell.getComboboxOptions() == null || xlsxCell.getComboboxOptions().length == 0) {
                     break;
                 }
-                if (String.join(",", cellArg.getComboboxOptions()).length() < 255) {
+                if (String.join(",", xlsxCell.getComboboxOptions()).length() < 255) {
                     //普通字符串选项下拉（小于255个字符时使用，防止创建过多sheet）
-                    addValidationDataOptionsNoCreateHiddenSheet(sheet, cellArg.getComboboxOptions(), optionStartRow, optionEndRow, columnIndex);
+                    addValidationDataOptionsNoCreateHiddenSheet(sheet, xlsxCell.getComboboxOptions(), optionStartRow, optionEndRow, columnIndex);
                 } else {
                     //生成sheet作为下拉选项（超过255个字符时）
-                    addSheetValidationDataOptions(sheet, cellArg, optionStartRow, optionEndRow, columnIndex);
+                    addSheetValidationDataOptions(sheet, xlsxCell, optionStartRow, optionEndRow, columnIndex);
                 }
                 break;
             case TYPE_COMBOBOX_INDIRECT:
-                if(cellArg.getComboboxSubOptionMap() == null || cellArg.getComboboxSubOptionMap().isEmpty()) {
+                if(xlsxCell.getComboboxSubOptionMap() == null || xlsxCell.getComboboxSubOptionMap().isEmpty()) {
                     break;
                 }
                 //3为级联下拉
-                addIndirectValidationDataOptions(sheet, cellArg, optionStartRow, optionEndRow, columnIndex);
+                addIndirectValidationDataOptions(sheet, xlsxCell, optionStartRow, optionEndRow, columnIndex);
                 break;
             default:
                 break;
@@ -284,7 +284,7 @@ public class XlsxExporter {
     }
 
     //生成sheet的方式做下拉框，可解决枚举值超过255个字符的问题，此列可作为被级联的列，被级联时需要使用此方式
-    private static void addSheetValidationDataOptions(XSSFSheet sheet, CellArg cellArg, int optionStartRow, int optionEndRow, int columnIndex) {
+    private static void addSheetValidationDataOptions(XSSFSheet sheet, XlsxCell xlsxCell, int optionStartRow, int optionEndRow, int columnIndex) {
         //创建一个sheet存储枚举值的下拉框数据
         XSSFSheet optionSheet = sheet.getWorkbook().createSheet();
         String optionSheetName = optionSheet.getSheetName();
@@ -292,7 +292,7 @@ public class XlsxExporter {
         sheet.getWorkbook().setSheetHidden(sheet.getWorkbook().getSheetIndex(optionSheetName), true);
 
         //直接按照枚举值初始化
-        String[] options = cellArg.getComboboxOptions();
+        String[] options = xlsxCell.getComboboxOptions();
         for (int i = 0; i < options.length; i++) {
             XSSFRow row = optionSheet.createRow(i);
             Cell cell = row.createCell(0);
@@ -309,7 +309,7 @@ public class XlsxExporter {
     }
 
     //级联下拉框
-    private static void addIndirectValidationDataOptions(XSSFSheet sheet, CellArg cellArg, int optionStartRow, int optionEndRow, int columnIndex) {
+    private static void addIndirectValidationDataOptions(XSSFSheet sheet, XlsxCell xlsxCell, int optionStartRow, int optionEndRow, int columnIndex) {
         //创建一个sheet存储枚举值的级联下拉框数据
         XSSFSheet optionSheet = sheet.getWorkbook().createSheet();
         String optionSheetName = optionSheet.getSheetName();
@@ -317,7 +317,7 @@ public class XlsxExporter {
         sheet.getWorkbook().setSheetHidden(sheet.getWorkbook().getSheetIndex(optionSheetName), true);
 
         //初始化一个 excel公式-指定名称，作为列表源
-        Map<String, String[]> indirectArgs = cellArg.getComboboxSubOptionMap();
+        Map<String, String[]> indirectArgs = xlsxCell.getComboboxSubOptionMap();
 
         int index = 0;
         String nameNamePrefix = "n_";
@@ -357,7 +357,7 @@ public class XlsxExporter {
         //每个单元格单独创建校验
         for (int i = optionStartRow; i <= optionEndRow; i++) {
             //将字符串/替换成空格，excel中name不支持/
-            String substitute = "SUBSTITUTE(\"" + nameNamePrefix + "\"&$" + convertToColumnName(cellArg.getCascadeColIndex()) + "$" + (i + 1)
+            String substitute = "SUBSTITUTE(\"" + nameNamePrefix + "\"&$" + convertToColumnName(xlsxCell.getCascadeColIndex()) + "$" + (i + 1)
                     + "&\"" + nameNameSuffix + "\",\"/\",\"\")";
             DataValidation childValidation = help.createValidation(
                     help.createFormulaListConstraint(

@@ -1,7 +1,7 @@
 package com.demo.poi.xlsx.util;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.demo.poi.xlsx.arg.CellArg;
+import com.demo.poi.xlsx.arg.XlsxCell;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,7 +32,7 @@ public class XlsxReader {
      * @param title         表头列信息
      * @return 表头为key的json数组  多行表头中间以 - 分割
      */
-    public static List<JSONObject> read(MultipartFile file, int titleStartRow, List<List<CellArg>> title) {
+    public static List<JSONObject> read(MultipartFile file, int titleStartRow, List<List<XlsxCell>> title) {
         if (file == null || file.isEmpty()) {
             return new ArrayList<>();
         }
@@ -40,7 +40,7 @@ public class XlsxReader {
     }
 
     //读取文件，title不为空就校验表头行
-    public static List<JSONObject> readData(MultipartFile file, int titleStartRow, int titleRowNum, List<List<CellArg>> title) {
+    public static List<JSONObject> readData(MultipartFile file, int titleStartRow, int titleRowNum, List<List<XlsxCell>> title) {
         List<JSONObject> rs = new ArrayList<>();
         if (file == null || file.isEmpty()) {
             return rs;
@@ -66,15 +66,15 @@ public class XlsxReader {
             //校验表头行数据是否正确
             for (int i = 0; i < title.size(); i++) {
                 Row titleRow = sheet.getRow(titleStartRow + i);
-                List<CellArg> cellArgs = title.get(i);
-                for (int j = 0; j < cellArgs.size(); j++) {
-                    CellArg cellArg = cellArgs.get(j);
+                List<XlsxCell> xlsxCells = title.get(i);
+                for (int j = 0; j < xlsxCells.size(); j++) {
+                    XlsxCell xlsxCell = xlsxCells.get(j);
                     String titleRowCellValue = getMergedCellValue(sheet, titleRow, j);
-                    if (!StringUtils.equals(cellArg.getValue(), titleRowCellValue)) {
+                    if (!StringUtils.equals(xlsxCell.getValue(), titleRowCellValue)) {
                         throw new RuntimeException("导入模板有误，请勿修改模板表头行！");
                     }
                     if (i == title.size() - 1) {
-                        titleKey[j] = cellArg.getKey();
+                        titleKey[j] = xlsxCell.getKey();
                     }
                 }
             }

@@ -2,7 +2,7 @@ package com.demo.poi.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.demo.poi.service.ExportExcelService;
-import com.demo.poi.xlsx.arg.SheetArg;
+import com.demo.poi.xlsx.arg.XlsxSheet;
 import com.demo.poi.xlsx.util.XlsxReader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,7 +42,7 @@ public class ExportExcelController {
     @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json，同时校验表头")
     public List<JSONObject> readXlsxAndCheckTitleDemo(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("titleStartRow") int titleStartRow) {
-        SheetArg arg = ExportExcelService.getSheetArg("sheet1");
+        XlsxSheet arg = ExportExcelService.getSheetArg("sheet1");
         return XlsxReader.read(file, titleStartRow, arg.getTitle());
     }
 

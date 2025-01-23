@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.util.Map;
 
 @Getter
-public class CellArg {
+public class XlsxCell {
 
     /**
      * 单元格所在列对应表头字段名
@@ -66,8 +66,8 @@ public class CellArg {
      */
     private boolean wrapText;
 
-    public static CellArg of(String value) {
-        CellArg cell = new CellArg();
+    public static XlsxCell of(String value) {
+        XlsxCell cell = new XlsxCell();
         cell.columnWidth = 3000;
         cell.type = XlsxExporter.TYPE_STRING;
         cell.style = XlsxCellStyle.STYLE_NORMAL;
@@ -76,8 +76,8 @@ public class CellArg {
         return cell;
     }
 
-    public static CellArg of(String key, String value) {
-        CellArg cell = of(value);
+    public static XlsxCell of(String key, String value) {
+        XlsxCell cell = of(value);
         cell.key = key;
         return cell;
     }
@@ -85,74 +85,74 @@ public class CellArg {
     /**
      * 创建标题行
      * @param value excel单元格内容
-     * @return CellArg
+     * @return XlsxCell
      */
-    public static CellArg ofT(String value) {
-        CellArg cell = of(value);
+    public static XlsxCell ofT(String value) {
+        XlsxCell cell = of(value);
         return cell.title();
     }
 
-    public static CellArg ofT(String key, String value) {
-        CellArg cell = of(value);
+    public static XlsxCell ofT(String key, String value) {
+        XlsxCell cell = of(value);
         cell.key = key;
         return cell.title();
     }
 
-    public CellArg readonly() {
+    public XlsxCell readonly() {
         this.style = XlsxCellStyle.STYLE_READONLY;
         return this;
     }
 
-    public CellArg error() {
+    public XlsxCell error() {
         this.style = XlsxCellStyle.STYLE_ERROR;
         return this;
     }
 
-    public CellArg readonly(boolean readonly) {
+    public XlsxCell readonly(boolean readonly) {
         if(readonly){
             return readonly();
         }
         return this;
     }
 
-    public CellArg error(boolean error) {
+    public XlsxCell error(boolean error) {
         if(error){
             return error();
         }
         return this;
     }
 
-    public CellArg title() {
+    public XlsxCell title() {
         this.style = XlsxCellStyle.STYLE_TITLE;
         return this;
     }
 
-    public CellArg key(String key) {
+    public XlsxCell key(String key) {
         this.key = key;
         return this;
     }
 
-    public CellArg value(String value) {
+    public XlsxCell value(String value) {
         this.value = value;
         return this;
     }
 
-    public CellArg annotations(String annotations) {
+    public XlsxCell annotations(String annotations) {
         this.annotations = annotations;
         return this;
     }
 
-    public CellArg columnWidth(int columnWidth) {
+    public XlsxCell columnWidth(int columnWidth) {
         this.columnWidth = columnWidth;
         return this;
     }
 
-    public CellArg rowHeight(short rowHeight) {
+    public XlsxCell rowHeight(short rowHeight) {
         this.rowHeight = rowHeight;
         return this;
     }
 
-    public CellArg combobox(String[] comboboxOptions) {
+    public XlsxCell combobox(String[] comboboxOptions) {
         this.type = XlsxExporter.TYPE_COMBOBOX;
         this.comboboxOptions = comboboxOptions;
         return this;
@@ -164,24 +164,24 @@ public class CellArg {
      * @param comboboxSubOptionMap 级联下拉可选子项
      * @return this
      */
-    public CellArg comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap) {
+    public XlsxCell comboboxIndirect(int cascadeColIndex, Map<String, String[]> comboboxSubOptionMap) {
         this.cascadeColIndex = cascadeColIndex;
         this.comboboxSubOptionMap = comboboxSubOptionMap;
         this.type = XlsxExporter.TYPE_COMBOBOX_INDIRECT;
         return this;
     }
 
-    public CellArg redFont() {
+    public XlsxCell redFont() {
         this.style = XlsxCellStyle.STYLE_RED_FONT;
         return this;
     }
 
-    public CellArg leftTop() {
+    public XlsxCell leftTop() {
         this.style = XlsxCellStyle.STYLE_LEFT_TOP;
         return this;
     }
 
-    public CellArg wrapText(){
+    public XlsxCell wrapText(){
         this.wrapText = true;
         return this;
     }

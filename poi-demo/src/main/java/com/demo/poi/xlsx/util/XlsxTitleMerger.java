@@ -1,6 +1,6 @@
 package com.demo.poi.xlsx.util;
 
-import com.demo.poi.xlsx.arg.CellArg;
+import com.demo.poi.xlsx.arg.XlsxCell;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -16,7 +16,7 @@ public class XlsxTitleMerger {
      * @param sheet    工作表
      * @param headers  表头数据
      */
-    public static void mergeHorizontalAndVerticalCells(Sheet sheet, List<List<CellArg>> headers) {
+    public static void mergeHorizontalAndVerticalCells(Sheet sheet, List<List<XlsxCell>> headers) {
         try{
             int rowCount = headers.size();
             int colCount = headers.get(0).size();
