@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,10 @@ public class XlsxReader {
 
     public static List<JSONObject> read(MultipartFile file, int titleStartRow, int titleRowNum, String sheetName) {
         return readData(file, titleStartRow, titleRowNum, null, sheetName);
+    }
+
+    public static List<JSONObject> read(InputStream inputStream, int titleStartRow, int titleRowNum, String sheetName) throws IOException {
+        return readData(inputStream, titleStartRow, titleRowNum, null, sheetName);
     }
 
     /**
@@ -42,22 +47,27 @@ public class XlsxReader {
         return readData(file, titleStartRow, title.size(), title, null);
     }
 
-    //读取文件，title不为空就校验表头行
-    public static List<JSONObject> readData(MultipartFile file,
+    private static List<JSONObject> readData(MultipartFile file,
                                             int titleStartRow,
                                             int titleRowNum,
                                             List<List<XlsxCell>> title,
                                             String sheetName) {
-        List<JSONObject> rs = new ArrayList<>();
-        if (file == null || file.isEmpty()) {
-            return rs;
-        }
-        XSSFWorkbook workbook;
-        try {
-            workbook = new XSSFWorkbook(file.getInputStream());
+        try (InputStream inputStream = file.getInputStream()) {
+            return readData(inputStream, titleStartRow, titleRowNum, title, sheetName);
         } catch (IOException e) {
-            throw new RuntimeException("IO异常，读取上传文件失败！");
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("文件读取失败");
         }
+    }
+
+    //读取文件，title不为空就校验表头行
+    private static List<JSONObject> readData(InputStream inputStream,
+                                            int titleStartRow,
+                                            int titleRowNum,
+                                            List<List<XlsxCell>> title,
+                                            String sheetName) throws IOException {
+        List<JSONObject> rs = new ArrayList<>();
+        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 
         XSSFSheet sheet;
         if (sheetName == null || sheetName.isEmpty()) {
@@ -134,7 +144,7 @@ public class XlsxReader {
      * @param col   列索引
      * @return 单元格的值，如果单元格为空则返回空字符串
      */
-    public static String getMergedCellValue(Sheet sheet, Row row, int col) {
+    private static String getMergedCellValue(Sheet sheet, Row row, int col) {
         // 获取单元格
         Cell cell = row.getCell(col);
         if (cell != null) {
@@ -185,7 +195,7 @@ public class XlsxReader {
      * @param input 输入字符串
      * @return 处理后的字符串
      */
-    public static String trimAndRemoveEmptyPipes(String input) {
+    private static String trimAndRemoveEmptyPipes(String input) {
         if (input == null || input.isEmpty()) {
             return input;
         }
