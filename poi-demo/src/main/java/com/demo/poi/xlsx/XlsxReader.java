@@ -20,7 +20,11 @@ import java.util.List;
 public class XlsxReader {
 
     public static List<JSONObject> read(MultipartFile file, int titleStartRow, int titleRowNum) {
-        return readData(file, titleStartRow, titleRowNum, null);
+        return readData(file, titleStartRow, titleRowNum, null, null);
+    }
+
+    public static List<JSONObject> read(MultipartFile file, int titleStartRow, int titleRowNum, String sheetName) {
+        return readData(file, titleStartRow, titleRowNum, null, sheetName);
     }
 
     /**
@@ -35,11 +39,15 @@ public class XlsxReader {
         if (file == null || file.isEmpty()) {
             return new ArrayList<>();
         }
-        return readData(file, titleStartRow, title.size(), title);
+        return readData(file, titleStartRow, title.size(), title, null);
     }
 
     //读取文件，title不为空就校验表头行
-    public static List<JSONObject> readData(MultipartFile file, int titleStartRow, int titleRowNum, List<List<XlsxCell>> title) {
+    public static List<JSONObject> readData(MultipartFile file,
+                                            int titleStartRow,
+                                            int titleRowNum,
+                                            List<List<XlsxCell>> title,
+                                            String sheetName) {
         List<JSONObject> rs = new ArrayList<>();
         if (file == null || file.isEmpty()) {
             return rs;
@@ -50,7 +58,17 @@ public class XlsxReader {
         } catch (IOException e) {
             throw new RuntimeException("IO异常，读取上传文件失败！");
         }
-        XSSFSheet sheet = workbook.getSheetAt(0);
+
+        XSSFSheet sheet;
+        if (sheetName == null || sheetName.isEmpty()) {
+            sheet = workbook.getSheetAt(0);
+        } else {
+            sheet = workbook.getSheet(sheetName);
+            if (sheet == null) {
+                throw new RuntimeException(sheetName + "不存在于当前excel文件中");
+            }
+        }
+
         if (titleStartRow != 0 && sheet.getPhysicalNumberOfRows() <= titleStartRow) {
             throw new RuntimeException("读取文件失败，请勿删除模板样式行！");
         }

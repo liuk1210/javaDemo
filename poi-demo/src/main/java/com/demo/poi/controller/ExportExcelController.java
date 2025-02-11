@@ -38,10 +38,19 @@ public class ExportExcelController {
         return XlsxReader.read(file, titleStartRow, titleRowNum);
     }
 
+    @PostMapping(value = "readXlsxBySheetName", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "读取xlsx中指定sheetName的内容", description = "将读取到的内容转换成json")
+    public List<JSONObject> readXlsxBySheetName(@RequestParam("file") MultipartFile file,
+                                                @RequestParam("titleStartRow") int titleStartRow,
+                                                @RequestParam("titleRowNum") int titleRowNum,
+                                                @RequestParam("sheetName") String sheetName) {
+        return XlsxReader.read(file, titleStartRow, titleRowNum, sheetName);
+    }
+
     @PostMapping(value = "readXlsxAndCheckTitleDemo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "读取xlsx内容", description = "将读取到的内容转换成json，同时校验表头")
     public List<JSONObject> readXlsxAndCheckTitleDemo(@RequestParam("file") MultipartFile file,
-                                                  @RequestParam("titleStartRow") int titleStartRow) {
+                                                      @RequestParam("titleStartRow") int titleStartRow) {
         XlsxSheet arg = ExportExcelService.getSheetArg("表1");
         return XlsxReader.read(file, titleStartRow, arg.getTitle());
     }
